@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { viewButtonClass } from "@stack-workbench/ui/workspace";
 import type { ReactNode } from "react";
 import type { LogEvent, LogException } from "@stack-workbench/log-parser";
 import { CodeView, CopyButton } from "./code-view";
 import { levelLabels, levelStyles } from "./summary";
 
+export const eventColumns =
+  "grid grid-cols-[3.75rem_minmax(0,1fr)] @[31rem]:grid-cols-[3.75rem_12.5rem_minmax(0,1fr)]";
 function DetailSection({
   label,
   children,
@@ -15,12 +18,12 @@ function DetailSection({
   return (
     <details
       onToggle={(event) => setOpen(event.currentTarget.open)}
-      className="min-w-0 rounded-lg border border-border bg-surface"
+      className="min-w-0 border-b border-border"
     >
-      <summary className="cursor-pointer rounded-lg px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-accent">
+      <summary className="cursor-pointer break-words px-2 py-2 text-ui font-medium hover:bg-surface-muted">
         {label}
       </summary>
-      {open && <div className="border-t border-border p-3">{children}</div>}
+      {open && <div className="px-2 pb-3">{children}</div>}
     </details>
   );
 }
@@ -67,13 +70,21 @@ function Properties({
   );
 }
 
-function EventDetails({
+export function EventDetails({
   event,
   exceptionsFirst,
 }: {
   event: LogEvent;
   exceptionsFirst: boolean;
 }) {
+  const views = [
+    "Overview",
+    ...(event.properties ? ["Properties"] : []),
+    ...(event.payloads.length ? ["Payloads"] : []),
+    ...(event.exception ? ["Exception"] : []),
+    "Raw event",
+  ];
+  const [view, setView] = useState(exceptionsFirst ? "Exception" : "Overview");
   const fields = [
     ["Timestamp", event.timestamp?.original],
     ["Recorded timezone", event.timestamp?.offset],
@@ -90,73 +101,107 @@ function EventDetails({
     ["HTTP status", event.httpStatus],
   ].filter(([, value]) => value !== undefined);
   return (
-    <div className="min-w-0 space-y-3 border-t border-border bg-background px-4 py-4">
-      {event.message && (
-        <div className="space-y-2">
-          <p className="line-clamp-8 text-sm whitespace-pre-wrap wrap-anywhere">
-            {event.message.slice(0, 3_000)}
-          </p>
-          <CopyButton text={event.message} label="Copy message" />
-        </div>
-      )}
-      {fields.length > 0 && (
-        <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
-          {fields.map(([label, value]) => (
-            <div key={label} className="min-w-0">
-              <dt className="text-xs text-muted-foreground">{label}</dt>
-              <dd className="font-mono text-xs wrap-anywhere">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-      {event.warnings.length > 0 && (
-        <ul
-          aria-label="Event warnings"
-          className="list-disc space-y-1 pl-5 text-sm text-muted-foreground"
-        >
-          {event.warnings.map((warning) => (
-            <li key={warning}>{warning}</li>
-          ))}
-        </ul>
-      )}
-      {event.exception &&
-        (exceptionsFirst ? (
-          <ExceptionDetails exception={event.exception} />
-        ) : (
-          <DetailSection label="Exception and stack trace">
-            <ExceptionDetails exception={event.exception} />
-          </DetailSection>
+    <>
+      <div
+        role="group"
+        aria-label="Event detail view"
+        className="flex flex-wrap gap-x-1 border-b border-border px-2 pt-1"
+      >
+        {views.map((item) => (
+          <button
+            key={item}
+            type="button"
+            aria-pressed={view === item}
+            className={viewButtonClass}
+            onClick={() => setView(item)}
+          >
+            {item}
+          </button>
         ))}
-      {event.payloads.map((payload, index) => (
-        <DetailSection
-          key={index}
-          label={[payload.kind, payload.role, payload.path.slice(0, 120)]
-            .filter(Boolean)
-            .join(" · ")}
-        >
-          <CodeView
-            text={payload.text}
-            label="Decoded payload"
-            language={payload.kind}
-          />
-          {payload.original !== undefined && (
-            <div className="mt-3">
-              <DetailSection label="Original encoded value">
-                <CodeView label="Original value" text={payload.original} />
-              </DetailSection>
-            </div>
-          )}
-        </DetailSection>
-      ))}
-      {event.properties && (
-        <DetailSection label="Structured properties">
+      </div>
+      <div className="min-w-0 px-3 py-3">
+        {view === "Overview" && (
+          <div className="space-y-3">
+            {event.message ? (
+              <div className="space-y-2">
+                <p className="line-clamp-8 font-mono text-ui whitespace-pre-wrap wrap-anywhere">
+                  {event.message.slice(0, 3_000)}
+                </p>
+                <CopyButton text={event.message} label="Copy message" />
+              </div>
+            ) : (
+              <p className="text-ui text-muted-foreground">
+                This event has no message.
+              </p>
+            )}
+            {fields.length > 0 && (
+              <dl className="divide-y divide-border border-y border-border">
+                {fields.map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="grid min-w-0 gap-0.5 py-1.5 sm:grid-cols-[minmax(7.5rem,1fr)_minmax(0,2fr)] sm:gap-2"
+                  >
+                    <dt className="text-label text-muted-foreground">
+                      {label}
+                    </dt>
+                    <dd className="font-mono text-label wrap-anywhere">
+                      {value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+            {event.warnings.length > 0 && (
+              <ul
+                aria-label="Event warnings"
+                className="list-disc space-y-1 pl-5 text-ui text-warning"
+              >
+                {event.warnings.map((warning) => (
+                  <li key={warning}>{warning}</li>
+                ))}
+              </ul>
+            )}
+            {(!event.payloads.length || !event.exception) && (
+              <p className="text-label text-muted-foreground">
+                {!event.payloads.length && "No extracted payloads."}{" "}
+                {!event.exception && "No recognized exception."}
+              </p>
+            )}
+          </div>
+        )}
+        {view === "Exception" && event.exception && (
+          <ExceptionDetails exception={event.exception} />
+        )}
+        {view === "Properties" && event.properties && (
           <Properties properties={event.properties} />
-        </DetailSection>
-      )}
-      <DetailSection label="Original raw event">
-        <CodeView label="Raw event" text={event.raw} />
-      </DetailSection>
-    </div>
+        )}
+        {view === "Raw event" && (
+          <CodeView label="Raw event" text={event.raw} />
+        )}
+        {view === "Payloads" &&
+          event.payloads.map((payload, index) => (
+            <DetailSection
+              key={index}
+              label={[payload.kind, payload.role, payload.path.slice(0, 120)]
+                .filter(Boolean)
+                .join(" · ")}
+            >
+              <CodeView
+                text={payload.text}
+                label="Decoded payload"
+                language={payload.kind}
+              />
+              {payload.original !== undefined && (
+                <div className="mt-2">
+                  <DetailSection label="Original encoded value">
+                    <CodeView label="Original value" text={payload.original} />
+                  </DetailSection>
+                </div>
+              )}
+            </DetailSection>
+          ))}
+      </div>
+    </>
   );
 }
 
@@ -165,55 +210,62 @@ export function EventRow({
   selected,
   onSelect,
   exceptionsFirst,
+  active,
+  onOpen,
 }: {
   event: LogEvent;
   selected: boolean;
   onSelect: (index: number, checked: boolean) => void;
   exceptionsFirst: boolean;
+  active: boolean;
+  onOpen: (index: number, trigger: HTMLButtonElement) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const text =
     (exceptionsFirst
       ? (event.exception?.type ?? event.exception?.message)
       : undefined) ??
     (event.message || event.warnings[0] || "Event has no message");
   return (
-    <li className="relative min-w-0">
-      <input
-        type="checkbox"
-        aria-label={"Select event " + (event.index + 1)}
-        checked={selected}
-        onChange={(change) => onSelect(event.index, change.target.checked)}
-        className="absolute top-4 left-4 z-10 size-4 accent-accent"
-      />
-      <details
-        className="group/event"
-        onToggle={(change) => setOpen(change.currentTarget.open)}
+    <li
+      className={
+        "grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] " +
+        (active ? "bg-accent-soft shadow-[inset_2px_0_var(--accent)]" : "")
+      }
+    >
+      <label className="grid place-items-center">
+        <input
+          type="checkbox"
+          aria-label={"Select event " + (event.index + 1)}
+          checked={selected}
+          onChange={(change) => onSelect(event.index, change.target.checked)}
+          className="size-4 accent-accent"
+        />
+      </label>
+      <button
+        type="button"
+        aria-pressed={active}
+        title="Inspect event"
+        onClick={(click) => onOpen(event.index, click.currentTarget)}
+        className={
+          eventColumns +
+          " min-h-9 min-w-0 items-center gap-x-2 gap-y-0.5 py-1.5 pr-3 text-left hover:bg-surface-muted aria-pressed:hover:bg-accent-soft focus-visible:-outline-offset-2"
+        }
       >
-        <summary className="relative grid min-h-12 cursor-pointer grid-cols-[4rem_minmax(0,1fr)] items-center gap-x-2 gap-y-1 py-2 pr-9 pl-11 hover:bg-surface-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent sm:grid-cols-[4rem_15rem_minmax(0,1fr)]">
-          <span
-            className={
-              "w-fit rounded px-2 py-1 text-xs font-semibold " +
-              levelStyles[event.level]
-            }
-          >
-            {levelLabels[event.level]}
-          </span>
-          <span className="truncate font-mono text-xs text-muted-foreground">
-            {event.timestamp?.original ?? "—"}
-          </span>
-          <span className="col-span-2 truncate text-sm font-medium sm:col-span-1">
-            {text.slice(0, 400)}
-          </span>
-          <span
-            aria-hidden="true"
-            className="absolute top-4 right-4 size-2 -rotate-45 border-r border-b border-muted-foreground group-open/event:rotate-45"
-          />
-        </summary>
-        {open && (
-          <EventDetails event={event} exceptionsFirst={exceptionsFirst} />
-        )}
-      </details>
+        <span
+          className={
+            "w-fit rounded-control px-1.5 py-0.5 font-mono text-label font-medium " +
+            levelStyles[event.level]
+          }
+        >
+          {levelLabels[event.level]}
+        </span>
+        <span className="truncate font-mono text-label text-muted-foreground">
+          {event.timestamp?.original ?? "—"}
+        </span>
+        <span className="col-span-2 truncate pl-1.5 font-mono text-label @[31rem]:col-span-1 @[31rem]:pl-0">
+          {text.slice(0, 400)}
+        </span>
+      </button>
     </li>
   );
 }

@@ -16,4 +16,4 @@ Use a streaming XML parser with namespace awareness and reject document type dec
 
 ## Consequences
 
-Worker startup and result cloning contribute to time before the first page appears. The explorer limits rendering to 50 rows per page and loads detail sections when expanded. Parsing recovery can retain a record as raw text with a warning. [Limits and measured results](../products/log-inspector.md)
+Worker startup and result cloning contribute to time before the first page appears. The explorer limits rendering to 50 rows per page and renders the active event inspector view on demand. Parsing recovery can retain a record as raw text with a warning. [Limits and measured results](../products/log-inspector.md)

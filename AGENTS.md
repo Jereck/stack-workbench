@@ -1,6 +1,7 @@
 # StackWorkbench agent instructions
 
 - Keep routing, the registry, and site composition in `apps/web`. Put each implemented tool in its own `tools/<slug>` workspace package. Tools may use shared packages and must never import another tool or the web app.
+- Follow the [StackWorkbench design system](docs/design/design-system.md) for every tool. Reuse semantic tokens, workspace components, and accessibility patterns, and review changes in both themes.
 - Use strict TypeScript, explicit package exports, small modules, and pure processing functions where practical. Match project lint and formatting conventions. Keep routes thin and controls keyboard accessible.
 - Process sensitive inputs in memory and on-device by default. Require explicit authorization for uploads. Keep those inputs out of URLs, storage, logs, console output, telemetry, and error reports. Render untrusted content as text. Use synthetic or appropriately licensed public fixtures.
 - Use pnpm and the pinned version. Check dependency compatibility and necessity, and include the regenerated lockfile for dependency changes. Keep secrets out of the repository.

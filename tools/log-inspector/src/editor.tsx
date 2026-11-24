@@ -13,12 +13,14 @@ export function Editor({
   onReady,
   onOriginalPaste,
   onPasteLimit,
+  heightClass,
 }: {
   editorRef: RefObject<LogEditor | null>;
   onChange: (hasInput: boolean) => void;
   onReady: () => void;
   onOriginalPaste: (text: string) => void;
   onPasteLimit: () => void;
+  heightClass: string;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<"loading" | "ready" | "failed">("loading");
@@ -38,10 +40,29 @@ export function Editor({
         const root = document.documentElement;
         const preference = window.matchMedia("(prefers-color-scheme: dark)");
         function theme() {
-          return root.dataset.theme === "dark" ||
-            (root.dataset.theme !== "light" && preference.matches)
-            ? "vs-dark"
-            : "vs";
+          const dark =
+            root.dataset.theme === "dark" ||
+            (root.dataset.theme !== "light" && preference.matches);
+          const styles = getComputedStyle(root);
+          const resolve = (name: string) => {
+            const value = styles.getPropertyValue(name);
+            const colors = value.match(/#[0-9a-f]{6}/gi);
+            return colors?.[dark ? 1 : 0] ?? value.trim();
+          };
+          editor.defineTheme("stack-workbench", {
+            base: dark ? "vs-dark" : "vs",
+            inherit: true,
+            rules: [],
+            colors: {
+              "editor.background": resolve("--background"),
+              "editor.foreground": resolve("--foreground"),
+              "editorLineNumber.foreground": resolve("--muted-foreground"),
+              "editorLineNumber.activeForeground": resolve("--foreground"),
+              "editor.selectionBackground": resolve("--selected"),
+              "editorCursor.foreground": resolve("--accent"),
+            },
+          });
+          return "stack-workbench";
         }
         const instance = editor.create(host.current, {
           language: "plaintext",
@@ -68,13 +89,23 @@ export function Editor({
           folding: false,
           padding: { top: 12, bottom: 12 },
           fontSize: 13,
-          fontFamily: "Cascadia Code, Consolas, monospace",
+          fontFamily:
+            "Geist Mono, JetBrains Mono, SFMono-Regular, Consolas, monospace",
+          lineHeight: 21,
+          renderLineHighlight: "none",
+          overviewRulerBorder: false,
           tabFocusMode: true,
           unicodeHighlight: {
             ambiguousCharacters: false,
             invisibleCharacters: false,
           },
         });
+        void document.fonts
+          .load('13px "Geist Mono"')
+          .then(() => {
+            if (active) editor.remeasureFonts();
+          })
+          .catch(() => undefined);
         editorRef.current = instance;
         const change = instance.onDidChangeModelContent(() =>
           onChange(Boolean(instance.getModel()?.getValueLength())),
@@ -151,7 +182,7 @@ export function Editor({
             : "The editor failed to load. Reload to try again."}
         </p>
       )}
-      <div ref={host} className="h-60 w-full sm:h-72" />
+      <div ref={host} className={"w-full " + heightClass} />
     </div>
   );
 }

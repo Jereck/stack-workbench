@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Redesigned the homepage and searchable tool directory around the available Log Inspector, with a real parsed preview of its synthetic example.
+- Added a responsive workspace shell, local sidebar preference, compact Log Inspector input and filters, and a dedicated event inspector with keyboard navigation.
+- Documented the shared light and dark design system and self-hosted Geist typography.
+
 - Established the StackWorkbench monorepo, public site, typed tool directory, planned-tool pages, and local theme preference.
 - Added the browser-local Log Inspector MVP with log parsing, payload and exception views, correlation search, and configurable redacted exports.
 - Documented development setup, handoff, and the first-release backlog.

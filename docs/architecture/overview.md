@@ -1,6 +1,6 @@
 # Architecture overview
 
-StackWorkbench uses one pnpm monorepo with explicit package dependencies. The Next.js App Router renders the public site and mounts tools at dedicated URLs. The initial pages are prerendered. Theme selection is client-side and stores only a theme preference.
+StackWorkbench uses one pnpm monorepo with explicit package dependencies. The Next.js App Router renders the public site and mounts tools at dedicated URLs. The initial pages are prerendered. Theme and workspace sidebar visibility are client-side preferences. The app owns the registry-backed workspace shell. Shared controls and layout primitives use semantic Tailwind tokens supplied by the app. [Design system](../design/design-system.md)
 
 ## Current boundaries
 

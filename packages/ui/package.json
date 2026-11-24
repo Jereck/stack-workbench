@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./button": "./src/button.tsx"
+    "./button": "./src/button.tsx",
+    "./workspace": "./src/workspace.tsx"
   },
   "dependencies": {
     "class-variance-authority": "0.7.1",

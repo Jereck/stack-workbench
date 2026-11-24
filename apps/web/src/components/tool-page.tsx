@@ -29,8 +29,8 @@ export function ToolPage({
   const planned = tool.availability === "planned";
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 lg:py-18">
-      <nav aria-label="Breadcrumb" className="mb-8 text-sm font-medium">
+    <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+      <nav aria-label="Breadcrumb" className="mb-5 text-ui font-medium">
         <Link
           href={`/tools#${tool.category}`}
           className="rounded-sm text-accent hover:underline"
@@ -43,14 +43,12 @@ export function ToolPage({
           <CategoryIcon category={tool.category} />
           <ToolStatus status={tool.availability} />
         </div>
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          {tool.name}
-        </h1>
-        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+        <h1 className="text-3xl font-semibold tracking-tight">{tool.name}</h1>
+        <p className="mt-3 text-base leading-relaxed text-secondary">
           {tool.description}
         </p>
       </div>
-      <dl className="mt-8 flex flex-wrap gap-x-12 gap-y-4 border-y border-border py-5">
+      <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 border-y border-border py-3">
         <div>
           <dt className="text-sm text-muted-foreground">
             {planned ? "Planned processing" : "Processing"}
@@ -66,7 +64,7 @@ export function ToolPage({
           <dd className="mt-1 font-semibold">{pricingLabels[tool.pricing]}</dd>
         </div>
       </dl>
-      <div className="mt-8">{children}</div>
+      <div className="mt-6">{children}</div>
     </div>
   );
 }
