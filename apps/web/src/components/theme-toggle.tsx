@@ -20,17 +20,18 @@ export function ThemeToggle() {
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="icon"
       aria-label="Dark theme"
+      title="Toggle dark theme"
       aria-pressed={mounted ? dark : undefined}
       disabled={!mounted}
       onClick={() => setTheme(dark ? "light" : "dark")}
     >
       {mounted && dark ? (
-        <Sun size={18} aria-hidden />
+        <Sun size={16} aria-hidden />
       ) : (
-        <Moon size={18} aria-hidden />
+        <Moon size={16} aria-hidden />
       )}
     </Button>
   );

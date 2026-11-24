@@ -5,7 +5,7 @@ test("finds the available Log Inspector on the homepage and in the directory", a
 }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Developer tools for real systems.",
+    "Developer tools for the systems you depend on.",
   );
   await expect(
     page.getByRole("link", { name: "Open Log Inspector" }),
@@ -24,14 +24,31 @@ test("finds the available Log Inspector on the homepage and in the directory", a
     .getByRole("link", { name: "Inspect" })
     .click();
   await expect(page).toHaveURL(/\/tools#inspect$/);
-  await page.getByRole("link", { name: "Log Inspector" }).click();
+  const search = page.getByRole("searchbox", { name: "Search tools" });
+  await search.fill("absent tool");
+  await expect(
+    page.getByText("No available tools found", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Log Inspector/ })).toHaveCount(
+    0,
+  );
+  await search.fill("soap");
+  await page.getByRole("link", { name: /^Log Inspector/ }).click();
   await expect(page).toHaveURL(/\/tools\/log-inspector$/);
   await expect(page).toHaveTitle("Log Inspector | StackWorkbench");
   await expect(
     page.getByRole("heading", { name: "Log Inspector", level: 1 }),
   ).toBeVisible();
-  await expect(page.getByText("Available", { exact: true })).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation", { name: "Workspace tools" })
+      .getByRole("link", { name: "Log Inspector" }),
+  ).toHaveAttribute("aria-current", "page");
+  await expect(
+    page.getByText("On-device processing", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Parse logs" })).toBeVisible();
+  await page.getByRole("link", { name: "Format guide" }).click();
   await expect(
     page.getByRole("heading", { name: "Supported log formats" }),
   ).toBeVisible();
@@ -53,12 +70,12 @@ test("exposes informational pages and makes no third-party requests", async ({
     "frame-ancestors 'none'",
   );
   await page.getByRole("link", { name: "Explore tools" }).click();
-  await page.getByRole("link", { name: "Log Inspector" }).click();
+  await page.getByRole("link", { name: /^Log Inspector/ }).click();
   await expect(
     page.getByRole("heading", { name: "Log Inspector" }),
   ).toBeVisible();
   await page
-    .getByRole("navigation", { name: "Main" })
+    .getByRole("navigation", { name: "Workspace tools" })
     .getByRole("link", { name: "About" })
     .click();
   await expect(
@@ -120,4 +137,25 @@ test("supports mobile navigation, keyboard access, and saved theme preference", 
   await expect(
     page.getByRole("heading", { name: "Tools", level: 1 }),
   ).toBeVisible();
+});
+
+test("remembers workspace sidebar visibility without storing workspace data", async ({
+  page,
+}) => {
+  await page.goto("/tools/log-inspector");
+  const toggle = page.getByRole("button", { name: "Tool sidebar" });
+  const navigation = page.getByRole("navigation", { name: "Workspace tools" });
+  await expect(navigation).toBeVisible();
+  await toggle.focus();
+  await page.keyboard.press("Space");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(navigation).toBeHidden();
+  await page.reload();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(navigation).toBeHidden();
+  await toggle.click();
+  await expect(navigation).toBeVisible();
+  expect(await page.evaluate(() => ({ ...localStorage }))).toEqual({
+    "stack-workbench-sidebar": "expanded",
+  });
 });

@@ -16,6 +16,8 @@ See [project status](../../PROJECT_STATUS.md) for the latest verification and [k
 
 ## P2 · Future enhancements
 
+- **Evaluate adjustable inspector widths.** Use feedback from real log exploration sessions to determine whether the fixed desktop split needs an accessible resizable divider.
+
 - **Evaluate broader log layout support.** Gather representative synthetic examples and agree on a bounded set of aliases or formats before implementation. Each accepted format needs a fixture and recovery tests for malformed records.
 
 ## P3 · Exploratory ideas

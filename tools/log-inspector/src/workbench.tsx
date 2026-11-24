@@ -11,7 +11,13 @@ import type { RedactionCategory } from "@stack-workbench/redaction-engine";
 import { Button } from "@stack-workbench/ui/button";
 import { Editor } from "./editor";
 import type { LogEditor } from "./editor";
-import { Explorer, controlClass } from "./explorer";
+import {
+  controlClass,
+  EmptyState,
+  KeyHint,
+  WorkspaceToolbar,
+} from "@stack-workbench/ui/workspace";
+import { Explorer } from "./explorer";
 import type { ExportFormat } from "./export";
 import { samples } from "./samples";
 import { ResultSummary } from "./summary";
@@ -36,6 +42,8 @@ export function LogInspector() {
   const [busy, setBusy] = useState<Operation>();
   const [notice, setNotice] = useState("");
   const [dragging, setDragging] = useState(false);
+  const [expandedEditor, setExpandedEditor] = useState(false);
+  const [collapsedInput, setCollapsedInput] = useState(false);
 
   const stop = useCallback(() => {
     const job = active.current;
@@ -96,7 +104,10 @@ export function LogInspector() {
     setBusy(undefined);
     setNotice("Workspace cleared.");
     setDragging(false);
-    editor.current?.focus();
+    setCollapsedInput(false);
+    setExpandedEditor(false);
+    if (collapsedInput) requestAnimationFrame(() => editor.current?.focus());
+    else editor.current?.focus();
   }
 
   function setText(text: string) {
@@ -104,6 +115,7 @@ export function LogInspector() {
     original.current = text;
     setHasInput(Boolean(text));
     setDirty(true);
+    setCollapsedInput(false);
   }
 
   function readFile(file: File) {
@@ -266,12 +278,29 @@ export function LogInspector() {
   else if (result && !dirty) indicator = "Detected · " + formats[result.format];
 
   return (
-    <div id="log-workbench" className="min-w-0 scroll-mt-6 space-y-5">
+    <div
+      id="log-workbench"
+      className="min-w-0"
+      onKeyDownCapture={(event) => {
+        if (
+          event.key !== "Enter" ||
+          !(event.metaKey || event.ctrlKey) ||
+          event.altKey ||
+          event.shiftKey ||
+          event.nativeEvent.isComposing
+        )
+          return;
+        if (!ready || !hasInput || busy) return;
+        event.preventDefault();
+        event.stopPropagation();
+        parse();
+      }}
+    >
       <section
         aria-labelledby="log-input-title"
         className={
-          "min-w-0 rounded-xl border bg-surface " +
-          (dragging ? "border-accent ring-2 ring-accent" : "border-border")
+          "relative min-w-0 border-b border-border " +
+          (dragging ? "z-10 ring-2 ring-inset ring-accent" : "")
         }
         onDragOver={(event) => {
           if (!event.dataTransfer.types.includes("Files")) return;
@@ -296,15 +325,10 @@ export function LogInspector() {
             readFile(event.dataTransfer.files[0]);
         }}
       >
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-5">
-          <div>
-            <h2 id="log-input-title" className="text-lg font-semibold">
-              Log input
-            </h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              Paste text or drop a UTF-8 log file here. Up to 4 MiB.
-            </p>
-          </div>
+        <WorkspaceToolbar>
+          <h2 id="log-input-title" className="mr-1 text-ui font-semibold">
+            Log input
+          </h2>
           <Button
             variant="outline"
             disabled={!ready || Boolean(busy)}
@@ -323,71 +347,63 @@ export function LogInspector() {
               if (file) readFile(file);
             }}
           />
-        </div>
-        <div className="border-y border-border bg-background">
-          <Editor
-            editorRef={editor}
-            onChange={changed}
-            onReady={editorReady}
-            onOriginalPaste={rememberPaste}
-            onPasteLimit={pasteLimit}
-          />
-        </div>
-        <div className="space-y-3 px-4 py-4 sm:px-5">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1 text-sm font-medium">
-              <label htmlFor="log-format">Log format</label>
-              <select
-                id="log-format"
-                className={controlClass}
-                value={format}
-                disabled={Boolean(busy)}
-                onChange={(event) => {
-                  setFormat(event.target.value as LogFormat);
-                  setDirty(true);
-                }}
-              >
-                {Object.entries(formats).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1 text-sm font-medium">
-              <label htmlFor="log-example">Load synthetic example</label>
-              <select
-                id="log-example"
-                className={controlClass}
-                value=""
-                disabled={!ready || Boolean(busy)}
-                onChange={(event) => {
-                  const sample = samples.find(
-                    ({ id }) => id === event.target.value,
-                  );
-                  if (!sample) return;
-                  setText(sample.text);
-                  setFormat("auto");
-                  setNotice("Example loaded. Parse logs to inspect it.");
-                }}
-              >
-                <option value="" disabled>
-                  Choose an example
-                </option>
-                {samples.map((sample) => (
-                  <option key={sample.id} value={sample.id}>
-                    {sample.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              disabled={!ready || !hasInput || Boolean(busy)}
-              onClick={parse}
+          <div className="w-42 max-w-full">
+            <label htmlFor="log-example" className="sr-only">
+              Load synthetic example
+            </label>
+            <select
+              id="log-example"
+              className={controlClass}
+              value=""
+              disabled={!ready || Boolean(busy)}
+              onChange={(event) => {
+                const sample = samples.find(
+                  ({ id }) => id === event.target.value,
+                );
+                if (!sample) return;
+                setText(sample.text);
+                setFormat("auto");
+                setNotice("Example loaded. Parse logs to inspect it.");
+              }}
             >
-              Parse logs
+              <option value="" disabled>
+                Load example
+              </option>
+              {samples.map((sample) => (
+                <option key={sample.id} value={sample.id}>
+                  {sample.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="w-41 max-w-full">
+            <label htmlFor="log-format" className="sr-only">
+              Log format
+            </label>
+            <select
+              id="log-format"
+              className={controlClass}
+              value={format}
+              disabled={Boolean(busy)}
+              onChange={(event) => {
+                setFormat(event.target.value as LogFormat);
+                setDirty(true);
+              }}
+            >
+              {Object.entries(formats).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-wrap items-center gap-1 sm:ml-auto">
+            <Button
+              variant="ghost"
+              disabled={!hasInput && !result && !busy}
+              onClick={clear}
+            >
+              Clear workspace
             </Button>
             {busy && (
               <Button
@@ -402,25 +418,76 @@ export function LogInspector() {
               </Button>
             )}
             <Button
-              variant="ghost"
-              disabled={!hasInput && !result && !busy}
-              onClick={clear}
+              disabled={!ready || !hasInput || Boolean(busy)}
+              onClick={parse}
+              aria-keyshortcuts="Control+Enter Meta+Enter"
+              title="Parse logs (Ctrl or Command + Enter)"
             >
-              Clear workspace
+              Parse logs{" "}
+              <span aria-hidden className="hidden xl:inline">
+                <KeyHint>Ctrl/⌘ ↵</KeyHint>
+              </span>
             </Button>
-            <p className="text-xs text-muted-foreground sm:ml-auto">
-              {indicator}
-            </p>
           </div>
-          <p role="status" className="text-sm text-muted-foreground">
-            {notice}
-          </p>
+        </WorkspaceToolbar>
+        <div
+          id="log-editor-pane"
+          hidden={collapsedInput}
+          className="group relative bg-background"
+        >
+          <Editor
+            editorRef={editor}
+            onChange={changed}
+            onReady={editorReady}
+            onOriginalPaste={rememberPaste}
+            onPasteLimit={pasteLimit}
+            heightClass={
+              expandedEditor
+                ? "h-[min(52dvh,32rem)]"
+                : result
+                  ? "h-32"
+                  : "h-48 sm:h-56"
+            }
+          />
+          {ready && !hasInput && (
+            <p
+              aria-hidden
+              className="pointer-events-none absolute top-3.5 left-10 font-mono text-label text-muted-foreground group-focus-within:hidden"
+            >
+              Paste logs here or drop a UTF-8 file.
+            </p>
+          )}
+        </div>
+        <div className="flex min-h-9 flex-wrap items-center gap-x-3 border-t border-border bg-sidebar px-3 text-label text-muted-foreground">
+          <p role="status">{notice || "UTF-8 · Up to 4 MiB"}</p>
+          <p className="sm:ml-auto">{indicator}</p>
+          <div className="flex items-center gap-1">
+            {!collapsedInput && (
+              <Button
+                size="default"
+                variant="ghost"
+                className="min-h-7 px-2 text-label"
+                onClick={() => setExpandedEditor(!expandedEditor)}
+              >
+                {expandedEditor ? "Compact editor" : "Expand editor"}
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              className="min-h-7 px-2 text-label"
+              aria-controls="log-editor-pane"
+              aria-expanded={!collapsedInput}
+              onClick={() => setCollapsedInput(!collapsedInput)}
+            >
+              {collapsedInput ? "Show input" : "Hide input"}
+            </Button>
+          </div>
         </div>
       </section>
-      {result && (
-        <div className="min-w-0 space-y-4">
+      {result ? (
+        <div className="min-w-0">
           {dirty && (
-            <p className="rounded-lg border border-border bg-surface-muted px-4 py-2 text-sm">
+            <p className="border-b border-border bg-warning-soft px-3 py-2 text-ui text-warning">
               Showing results from the last parse. Parse again to include your
               changes.
             </p>
@@ -432,6 +499,14 @@ export function LogInspector() {
             busy={Boolean(busy)}
             onExport={exportEvents}
           />
+        </div>
+      ) : (
+        <div className="border-b border-border">
+          <EmptyState title={hasInput ? "No parsed events" : "No input yet"}>
+            {hasInput
+              ? "Parse the input to search events, inspect payloads, and follow exceptions."
+              : "Paste logs, open a local file, or load an example to get started."}
+          </EmptyState>
         </div>
       )}
     </div>

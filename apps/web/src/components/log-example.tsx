@@ -1,47 +1,65 @@
-import { FileText, LockKeyhole } from "lucide-react";
-
-const exampleEntries = [
-  { time: "09:41:02", level: "INFO", message: "Worker started" },
-  { time: "09:41:03", level: "INFO", message: "GET /health 200" },
-  { time: "09:41:07", level: "WARN", message: "Upstream request slow" },
-  { time: "09:41:08", level: "ERROR", message: "POST /events timed out" },
-] as const;
-
-const levelClasses = {
-  INFO: "text-indigo-300",
-  WARN: "text-amber-300",
-  ERROR: "text-rose-300",
-};
+import { FileText } from "lucide-react";
+import { getLogPreview } from "@stack-workbench/log-inspector/preview";
 
 export function LogExample() {
+  const { events, payloads, exceptions } = getLogPreview();
   return (
-    <figure className="min-w-0 overflow-hidden rounded-2xl border border-terminal-border bg-terminal text-terminal-text shadow-xl shadow-slate-950/10">
-      <figcaption className="flex flex-wrap items-center justify-between gap-2 border-b border-terminal-border px-4 py-3.5 text-sm sm:px-5">
-        <span className="flex items-center gap-2 font-mono">
-          <FileText size={17} className="text-terminal-muted" aria-hidden />
-          example.log
+    <figure className="min-w-0 overflow-hidden rounded-panel border border-border bg-surface">
+      <figcaption className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-sidebar px-3 py-2.5 text-ui">
+        <span className="flex items-center gap-2 font-medium">
+          <FileText size={15} className="text-accent" aria-hidden />
+          Log Inspector
         </span>
-        <span className="text-terminal-muted">Synthetic sample</span>
+        <span className="font-mono text-label text-muted-foreground">
+          orders.ndjson
+        </span>
       </figcaption>
-      <ul className="space-y-1 px-2 py-4 font-mono text-xs sm:px-3 sm:text-sm">
-        {exampleEntries.map(({ time, level, message }) => (
-          <li
-            key={time}
-            className="grid grid-cols-[auto_5ch_minmax(0,1fr)] gap-2 rounded-md px-2 py-2 even:bg-white/5 sm:gap-4 sm:px-3"
-          >
-            <span className="text-terminal-muted">{time}</span>
-            <span className={levelClasses[level]}>{level}</span>
-            <span className="wrap-anywhere">{message}</span>
-          </li>
-        ))}
-      </ul>
-      <p className="flex items-center gap-2 border-t border-terminal-border px-4 py-3.5 text-sm text-terminal-muted sm:px-5">
-        <LockKeyhole
-          size={16}
-          className="shrink-0 text-indigo-300"
-          aria-hidden
-        />
-        Processes logs in your browser
+      <table className="w-full table-fixed text-left">
+        <thead className="border-b border-border bg-background text-label text-muted-foreground">
+          <tr>
+            <th scope="col" className="w-[15ch] px-3 py-2 font-medium">
+              Time (UTC)
+            </th>
+            <th scope="col" className="w-[8ch] px-2 py-2 font-medium">
+              Level
+            </th>
+            <th scope="col" className="px-2 py-2 font-medium">
+              Message
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border font-mono text-label">
+          {events.map(({ index, time, level, message }) => (
+            <tr
+              key={index}
+              className={level === "error" ? "bg-accent-soft" : undefined}
+            >
+              <td className="px-3 py-2.5 align-top text-muted-foreground">
+                {time}
+              </td>
+              <td className="px-2 py-2.5 align-top">
+                <span
+                  className={
+                    level === "error"
+                      ? "text-danger"
+                      : level === "warn"
+                        ? "text-warning"
+                        : "text-secondary"
+                  }
+                >
+                  {level.toUpperCase()}
+                </span>
+              </td>
+              <td className="px-2 py-2.5 break-words">{message}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-background px-3 py-2.5 text-label text-muted-foreground">
+        <span>
+          {events.length} events · {payloads} payloads · {exceptions} exception
+        </span>
+        <span>Synthetic sample</span>
       </p>
     </figure>
   );

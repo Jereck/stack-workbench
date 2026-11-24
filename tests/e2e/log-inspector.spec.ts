@@ -52,7 +52,8 @@ test("pastes logs, explores results and downloads redacted copies locally", asyn
   const editor = page.getByRole("textbox", { name: /Raw log text/ });
   await editor.focus();
   await editor.press("ControlOrMeta+v");
-  await parse(page, 4);
+  await editor.press("ControlOrMeta+Enter");
+  await expect(page.getByText(/^Parsed 4 events/)).toBeVisible();
 
   await expect(page.getByText("Detected · JSON Lines / NDJSON")).toBeVisible();
   await page.getByText(/^Parsing warnings \(/).click();
@@ -68,7 +69,11 @@ test("pastes logs, explores results and downloads redacted copies locally", asyn
   await page.getByLabel("Severity", { exact: true }).selectOption("error");
   await expect(page.getByText("1 matching events")).toBeVisible();
 
-  await rows.first().locator("summary").first().press("Enter");
+  await rows.first().getByRole("button").press("Enter");
+  await expect(
+    page.getByRole("heading", { name: "Event 1", exact: true }),
+  ).toBeFocused();
+  await page.getByRole("button", { name: "Payloads", exact: true }).click();
   await page
     .getByText("JSON · response · properties.responseBody", { exact: true })
     .click();
@@ -80,7 +85,7 @@ test("pastes logs, explores results and downloads redacted copies locally", asyn
   await expect(
     page.getByLabel("Original value", { exact: true }),
   ).toContainText(sensitive.password);
-  await page.getByText("Original raw event", { exact: true }).click();
+  await page.getByRole("button", { name: "Raw event", exact: true }).click();
   await page.getByRole("button", { name: "Copy raw event" }).click();
   await expect
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
@@ -122,7 +127,7 @@ test("pastes logs, explores results and downloads redacted copies locally", asyn
   await page.getByRole("button", { name: "Exceptions", exact: true }).click();
   await page
     .getByRole("list", { name: "Events with exceptions" })
-    .locator("summary")
+    .getByRole("button")
     .first()
     .click();
   await expect(
@@ -179,15 +184,15 @@ test("opens and drops local files, preserves malformed text, and handles worker 
     .getByRole("list", { name: "Log events", exact: true })
     .getByText(invalidJson, { exact: true })
     .click();
-  await page.getByText("Original raw event", { exact: true }).click();
-  await expect(page.getByLabel("Raw event", { exact: true })).toContainText(
-    invalidJson,
-  );
   await expect(
     page.getByText("Malformed or unsupported JSON was retained as raw text.", {
       exact: true,
     }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Raw event", exact: true }).click();
+  await expect(page.getByLabel("Raw event", { exact: true })).toContainText(
+    invalidJson,
+  );
 
   await input.setInputFiles({
     name: "too-big.log",
@@ -272,7 +277,8 @@ test("loads an example and keeps the workbench usable on a narrow viewport", asy
   const rows = page
     .getByRole("list", { name: "Log events", exact: true })
     .getByRole("listitem");
-  await rows.nth(2).locator("summary").first().click();
+  await rows.nth(2).getByRole("button").click();
+  await page.getByRole("button", { name: "Payloads", exact: true }).click();
   await page
     .getByText("SOAP · response · properties.responseBody", { exact: true })
     .click();
@@ -282,4 +288,49 @@ test("loads an example and keeps the workbench usable on a narrow viewport", asy
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
     360,
   );
+});
+
+test("keeps the paginated event list usable with input hidden and details open", async ({
+  page,
+}) => {
+  await openInspector(page);
+  await page.getByLabel("Choose log file").setInputFiles({
+    name: "synthetic-page.log",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      Array.from(
+        { length: 104 },
+        (_, index) => "[INFO] Sample event " + (index + 1),
+      ).join("\n"),
+    ),
+  });
+  await expect(
+    page.getByText("Local file loaded. Parse logs to inspect it."),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Hide input" }).click();
+  const editor = page.getByRole("textbox", { name: /Raw log text/ });
+  await expect(editor).toBeHidden();
+  await parse(page, 104);
+
+  const rows = page
+    .getByRole("list", { name: "Log events", exact: true })
+    .getByRole("listitem");
+  const pager = page.getByRole("navigation", { name: "Results pages" });
+  await expect(rows).toHaveCount(50);
+  await rows.first().getByRole("button").click();
+  await expect(
+    page.getByRole("heading", { name: "Event 1", exact: true }),
+  ).toBeVisible();
+  await pager.getByRole("button", { name: "Next" }).click();
+  await expect(pager).toContainText("Page 2 of 3");
+  await expect(rows.first()).toContainText("Sample event 51");
+  await expect(
+    page.getByRole("heading", { name: "Event 1", exact: true }),
+  ).toHaveCount(0);
+  await pager.getByRole("button", { name: "Next" }).click();
+  await expect(rows).toHaveCount(4);
+
+  await page.getByRole("button", { name: "Clear workspace" }).click();
+  await expect(editor).toBeFocused();
+  await expect(rows).toHaveCount(0);
 });

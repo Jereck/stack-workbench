@@ -55,6 +55,6 @@ Playwright starts the dev server locally if it is not already running. GitHub Ac
 
 ## Add a tool
 
-Add its public metadata to the [tool registry](apps/web/src/lib/tools.ts). A planned entry gets a detail page automatically. Once the tool is functional, add its independent package under `tools/<slug>`, declare it as a web workspace dependency, and mount its entry point in an explicit App Router page. Reuse the tool page layout, add tests, and change the registry status to `available` in the same change. [Tool development guide](docs/architecture/tool-development.md)
+Add its public metadata to the [tool registry](apps/web/src/lib/tools.ts). A planned entry gets a detail page automatically. Once the tool is functional, add its independent package under `tools/<slug>`, declare it as a web workspace dependency, and mount its entry point in an explicit App Router page. Reuse the workspace shell and follow the [design system](docs/design/design-system.md), add tests, and change the registry status to `available` in the same change. [Tool development guide](docs/architecture/tool-development.md)
 
 Start with [project status](PROJECT_STATUS.md). The [development workflow](docs/development/workflow.md) covers machine setup and handoffs. See the [roadmap](ROADMAP.md) for candidate products and [AGENTS.md](AGENTS.md) for repository working conventions.

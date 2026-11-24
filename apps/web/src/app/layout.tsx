@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { PublicChrome } from "@/components/public-chrome";
+import { listTools } from "@/lib/tools";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,10 +11,14 @@ export const metadata: Metadata = {
     template: "%s | StackWorkbench",
   },
   description:
-    "A privacy-first workbench for inspecting, comparing, validating, and monitoring applications and integrations.",
+    "A privacy-first developer workbench. Search application logs, inspect payloads, and follow failed requests on your device.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const workspacePaths = listTools()
+    .filter((tool) => tool.availability === "available")
+    .map(({ slug }) => "/tools/" + slug);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="flex min-h-screen flex-col font-sans antialiased">
@@ -25,7 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           >
             Skip to content
           </a>
-          <SiteHeader />
+          <PublicChrome position="header" workspacePaths={workspacePaths} />
           <main
             id="content"
             tabIndex={-1}
@@ -33,7 +37,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           >
             {children}
           </main>
-          <SiteFooter />
+          <PublicChrome position="footer" workspacePaths={workspacePaths} />
         </ThemeProvider>
       </body>
     </html>

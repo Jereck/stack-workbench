@@ -2,7 +2,7 @@
 
 ## Site data flow
 
-The browser loads same-origin pages and assets. StackWorkbench has no analytics or session recording. On first visit the site follows the system color mode. A changed theme can be saved locally under `stack-workbench-theme`.
+The browser loads same-origin pages and assets. StackWorkbench has no analytics or session recording. On first visit the site follows the system color mode. A changed theme can be saved locally under `stack-workbench-theme`. Toggling the workspace sidebar can save `expanded` or `collapsed` under `stack-workbench-sidebar`. The homepage preview parses a bundled synthetic fixture during page generation. The preview entry point accepts no user input.
 
 The web server sets a no-referrer policy, disables MIME sniffing, and sets a content security policy limiting framing, base URIs, embedded objects, and form destinations. Before adding a hosted service, review its request logging and retention and evaluate a script policy compatible with Next.js and the chosen hosting model.
 

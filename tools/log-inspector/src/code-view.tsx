@@ -7,9 +7,9 @@ const jsonToken =
   /("(?:\\[\s\S]|[^"\\])*")(\s*:)?|(-?\d+(?:\.\d+)?(?:e[+-]?\d+)?)|\b(true|false|null)\b/gi;
 const xmlToken =
   /<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|<\?[\s\S]*?\?>|<\/?[\w:.-]+(?:[^<>"']|"[^"]*"|'[^']*')*>|&(?:#x[\da-f]+|#\d+|\w+);/gi;
-const keyStyle = "text-[light-dark(#384fb0,#a9baff)]";
-const stringStyle = "text-[light-dark(#26644c,#83d6ad)]";
-const valueStyle = "text-[light-dark(#87500e,#f6c477)]";
+const keyStyle = "text-syntax-key";
+const stringStyle = "text-success";
+const valueStyle = "text-warning";
 
 function highlight(text: string, language: Language) {
   if (language === "Text") return text;
@@ -109,7 +109,7 @@ export function CopyButton({
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
       <Button
-        className="min-h-9 px-3 py-1"
+        className="min-h-7 px-2 py-1 text-label"
         variant="outline"
         onClick={() => void copy()}
       >
@@ -148,7 +148,7 @@ export function CodeView({
       <pre
         aria-label={label}
         tabIndex={0}
-        className="max-h-80 overflow-auto rounded-lg border border-border bg-surface-muted p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap wrap-anywhere focus-visible:outline-2 focus-visible:outline-accent"
+        className="max-h-80 overflow-auto rounded-control border border-border bg-background p-3 font-mono text-xs leading-relaxed whitespace-pre-wrap wrap-anywhere focus-visible:outline-2 focus-visible:outline-accent"
       >
         <code>
           {full && truncated ? content : highlight(content, language)}

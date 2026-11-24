@@ -4,15 +4,15 @@ export function LogInspectorGuide() {
   return (
     <article
       aria-labelledby="log-guide-title"
-      className="mt-10 grid gap-6 border-t border-border pt-8 md:grid-cols-2"
+      className="grid gap-4 border-t border-border p-4 md:grid-cols-2"
     >
       <h2
         id="log-guide-title"
-        className="text-2xl font-semibold tracking-tight md:col-span-2"
+        className="text-base font-semibold tracking-tight md:col-span-2"
       >
         Troubleshoot logs in your browser
       </h2>
-      <InformationSection title="Supported log formats">
+      <InformationSection level={3} title="Supported log formats">
         <p>
           Open plain-text application logs, JSON objects and arrays, JSON Lines
           (NDJSON), compact or timestamped Serilog logs, and common CloudWatch
@@ -21,7 +21,7 @@ export function LogInspectorGuide() {
           and 4 MiB or smaller.
         </p>
       </InformationSection>
-      <InformationSection title="Follow a failed API request">
+      <InformationSection level={3} title="Follow a failed API request">
         <p>
           Paste a log, open a local file, or load the synthetic API example.
           Choose Parse logs, filter for errors, then open an event to see its
@@ -29,7 +29,7 @@ export function LogInspectorGuide() {
           Correlations to follow an exact trace, request, or correlation ID.
         </p>
       </InformationSection>
-      <InformationSection title="Find what caused an exception">
+      <InformationSection level={3} title="Find what caused an exception">
         <p>
           Open Exceptions and expand the failing event for its stack trace and
           nested causes. Sort by timestamp to compare events with known
@@ -37,7 +37,7 @@ export function LogInspectorGuide() {
           original order at the end of the timeline.
         </p>
       </InformationSection>
-      <InformationSection title="Keep logs on your device">
+      <InformationSection level={3} title="Keep logs on your device">
         <p>
           Log Inspector processes input in memory on your device. It has no
           account, upload, or saved history. Clear the workspace to discard

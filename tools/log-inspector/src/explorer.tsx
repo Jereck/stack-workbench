@@ -1,4 +1,10 @@
-import { useDeferredValue, useMemo, useState } from "react";
+import {
+  useDeferredValue,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   filterEvents,
   groupCorrelations,
@@ -16,12 +22,16 @@ import {
 } from "@stack-workbench/redaction-engine";
 import type { RedactionCategory } from "@stack-workbench/redaction-engine";
 import { Button } from "@stack-workbench/ui/button";
-import { EventRow } from "./event-detail";
+import {
+  controlClass,
+  EmptyState,
+  viewButtonClass,
+  WorkspaceToolbar,
+} from "@stack-workbench/ui/workspace";
+import { eventColumns, EventDetails, EventRow } from "./event-detail";
 import type { ExportFormat } from "./export";
 import { levelLabels } from "./summary";
 
-export const controlClass =
-  "min-h-10 min-w-0 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-accent";
 const pageSize = 50;
 const modes = ["Events", "Correlations", "Exceptions"] as const;
 const correlationLabels = {
@@ -53,11 +63,11 @@ function ExportControls({
   const [categories, setCategories] = useState(allRedactions);
   const events = scope === "selected" ? selected : filtered;
   return (
-    <details className="rounded-lg border border-border bg-background">
-      <summary className="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-accent">
+    <details className="min-w-0 border-t border-border bg-surface">
+      <summary className="w-fit cursor-pointer rounded-control px-2 py-1.5 text-ui font-medium hover:bg-surface-muted">
         Export events
       </summary>
-      <div className="space-y-3 border-t border-border p-3">
+      <div className="max-w-2xl space-y-3 p-3">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1 text-sm">
             <label htmlFor="log-export-scope">Export scope</label>
@@ -158,6 +168,11 @@ export function Explorer({
   const [order, setOrder] = useState<"input" | "newest" | "oldest">("input");
   const [selected, setSelected] = useState<ReadonlySet<number>>(new Set());
   const [page, setPage] = useState(0);
+  const [inspectedIndex, setInspectedIndex] = useState<number>();
+  const rowTrigger = useRef<HTMLButtonElement>(null);
+  const focusInspector = useRef(false);
+  const inspectorHeading = useRef<HTMLHeadingElement>(null);
+
   const deferredQuery = useDeferredValue(query);
   const showGroups = mode === "Correlations";
   const events = useMemo(
@@ -204,6 +219,24 @@ export function Explorer({
   const currentPage = Math.min(pageCount - 1, page);
   const start = currentPage * pageSize;
   const activeEvents = showGroups ? [] : events.slice(start, start + pageSize);
+  const inspected = activeEvents.find(
+    (event) => event.index === inspectedIndex,
+  );
+
+  useLayoutEffect(() => {
+    if (!inspected || !focusInspector.current) return;
+    focusInspector.current = false;
+    inspectorHeading.current?.focus({
+      preventScroll: window.matchMedia("(min-width: 1024px)").matches,
+    });
+  }, [inspected]);
+
+  function closeInspector() {
+    setInspectedIndex(undefined);
+    rowTrigger.current?.focus();
+    rowTrigger.current = null;
+  }
+
   const allOnPage =
     activeEvents.length > 0 &&
     activeEvents.every((event) => selected.has(event.index));
@@ -220,6 +253,7 @@ export function Explorer({
   }
 
   function openGroup(group: Correlation) {
+    setInspectedIndex(undefined);
     setCorrelation(group);
     setMode("Events");
     setIdentifier("");
@@ -228,39 +262,73 @@ export function Explorer({
     setPage(0);
   }
 
+  const pager = pageCount > 1 && (
+    <nav
+      aria-label="Results pages"
+      className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3 text-sm"
+    >
+      <span className="text-muted-foreground">
+        Page {currentPage + 1} of {pageCount}
+      </span>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          disabled={currentPage === 0}
+          onClick={() => {
+            setInspectedIndex(undefined);
+            setPage(currentPage - 1);
+          }}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          disabled={currentPage + 1 === pageCount}
+          onClick={() => {
+            setInspectedIndex(undefined);
+            setPage(currentPage + 1);
+          }}
+        >
+          Next
+        </Button>
+      </div>
+    </nav>
+  );
+
   return (
     <section
       aria-labelledby="log-explorer-title"
-      className="min-w-0 rounded-xl border border-border bg-surface"
+      className="min-w-0 border-b border-border bg-surface"
     >
-      <div className="space-y-4 border-b border-border p-4 sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="log-explorer-title" className="text-lg font-semibold">
-            Event explorer
-          </h2>
-          <div
-            role="group"
-            aria-label="Explorer view"
-            className="inline-flex max-w-full flex-wrap gap-1 rounded-lg border border-border bg-background p-1"
-          >
-            {modes.map((item) => (
-              <Button
-                key={item}
-                variant={mode === item ? "primary" : "ghost"}
-                className="min-h-9 px-2.5 sm:px-3"
-                aria-pressed={mode === item}
-                onClick={() => {
-                  setMode(item);
-                  setPage(0);
-                }}
-              >
-                {item}
-              </Button>
-            ))}
-          </div>
+      <WorkspaceToolbar className="min-h-10 gap-x-4 pb-0">
+        <h2 id="log-explorer-title" className="pb-1 text-ui font-semibold">
+          Event explorer
+        </h2>
+        <div
+          role="group"
+          aria-label="Explorer view"
+          className="flex flex-wrap gap-x-1"
+        >
+          {modes.map((item) => (
+            <button
+              type="button"
+              key={item}
+              className={viewButtonClass}
+              aria-pressed={mode === item}
+              onClick={() => {
+                setMode(item);
+                setPage(0);
+                setInspectedIndex(undefined);
+              }}
+            >
+              {item}
+            </button>
+          ))}
         </div>
+      </WorkspaceToolbar>
+      <div className="border-b border-border px-3 pt-2">
         {showGroups ? (
-          <label className="block max-w-md space-y-1 text-sm font-medium">
+          <label className="mb-2 block max-w-md space-y-1 text-label font-medium">
             <span>Find an identifier</span>
             <input
               className={controlClass}
@@ -274,9 +342,9 @@ export function Explorer({
             />
           </label>
         ) : (
-          <div className="space-y-3">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.35fr_0.75fr_0.9fr_0.8fr]">
-              <label className="min-w-0 space-y-1 text-sm font-medium">
+          <div className="space-y-2">
+            <div className="grid gap-2 min-[360px]:grid-cols-2 lg:grid-cols-[1.35fr_0.75fr_0.9fr_0.8fr]">
+              <label className="min-w-0 space-y-1 text-label font-medium">
                 <span>Search logs</span>
                 <input
                   className={controlClass}
@@ -290,7 +358,7 @@ export function Explorer({
                   }}
                 />
               </label>
-              <div className="space-y-1 text-sm font-medium">
+              <div className="space-y-1 text-label font-medium">
                 <label htmlFor="log-severity">Severity</label>
                 <select
                   id="log-severity"
@@ -309,7 +377,7 @@ export function Explorer({
                   ))}
                 </select>
               </div>
-              <label className="space-y-1 text-sm font-medium">
+              <label className="space-y-1 text-label font-medium">
                 <span>Correlation identifier</span>
                 <input
                   className={controlClass}
@@ -322,7 +390,7 @@ export function Explorer({
                   }}
                 />
               </label>
-              <div className="space-y-1 text-sm font-medium">
+              <div className="space-y-1 text-label font-medium">
                 <label htmlFor="log-order">Sort events</label>
                 <select
                   id="log-order"
@@ -366,7 +434,7 @@ export function Explorer({
           </div>
         )}
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-background px-4 py-2 text-sm text-muted-foreground">
+      <div className="flex min-h-8 flex-wrap items-center justify-between gap-2 border-b border-border bg-sidebar px-3 py-1 text-label text-muted-foreground">
         <p role="status" className="tabular-nums">
           {count.toLocaleString()}{" "}
           {showGroups ? "identifier groups" : "matching events"}
@@ -392,78 +460,139 @@ export function Explorer({
         )}
       </div>
       {count === 0 ? (
-        <p className="p-5 text-sm text-muted-foreground">
-          {showGroups
-            ? "No matching trace, request, or correlation IDs."
-            : "No events match the current filters."}
-        </p>
-      ) : showGroups ? (
-        <ul aria-label="Correlation groups" className="divide-y divide-border">
-          {visibleGroups.slice(start, start + pageSize).map((group) => (
-            <li key={group.field + ":" + group.value}>
-              <button
-                type="button"
-                className="flex min-h-12 w-full min-w-0 items-center justify-between gap-3 px-4 py-2 text-left text-sm hover:bg-surface-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent"
-                onClick={() => openGroup(group)}
-              >
-                <span className="min-w-0">
-                  <span className="block text-xs text-muted-foreground">
-                    {correlationLabels[group.field]}
-                  </span>
-                  <span className="block truncate font-mono font-semibold">
-                    {group.value}
-                  </span>
-                </span>
-                <span className="shrink-0 text-muted-foreground">
-                  {group.count} {group.count === 1 ? "event" : "events"}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <ol
-          aria-label={
-            mode === "Exceptions" ? "Events with exceptions" : "Log events"
+        <EmptyState
+          title={
+            showGroups
+              ? "No matching identifiers"
+              : result.events.length === 0
+                ? "No parsed events"
+                : mode === "Exceptions" && result.summary.exceptions === 0
+                  ? "No exceptions found"
+                  : "No matching events"
           }
-          className="divide-y divide-border"
         >
-          {activeEvents.map((event) => (
-            <EventRow
-              key={event.index}
-              event={event}
-              selected={selected.has(event.index)}
-              onSelect={(index, checked) => selectEvents([index], checked)}
-              exceptionsFirst={mode === "Exceptions"}
-            />
-          ))}
-        </ol>
-      )}
-      {pageCount > 1 && (
-        <nav
-          aria-label="Results pages"
-          className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3 text-sm"
-        >
-          <span className="text-muted-foreground">
-            Page {currentPage + 1} of {pageCount}
-          </span>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              disabled={currentPage === 0}
-              onClick={() => setPage(currentPage - 1)}
+          {showGroups
+            ? "Try a different identifier."
+            : result.events.length === 0
+              ? "Check the source and format, then parse again."
+              : mode === "Exceptions" && result.summary.exceptions === 0
+                ? "Switch to Events to inspect the rest of the log."
+                : "Change the search or filters to broaden your results."}
+        </EmptyState>
+      ) : showGroups ? (
+        <>
+          <ul
+            aria-label="Correlation groups"
+            className="divide-y divide-border"
+          >
+            {visibleGroups.slice(start, start + pageSize).map((group) => (
+              <li key={group.field + ":" + group.value}>
+                <button
+                  type="button"
+                  className="flex min-h-10 w-full min-w-0 items-center justify-between gap-3 px-3 py-1.5 text-left text-ui hover:bg-surface-muted focus-visible:-outline-offset-2"
+                  onClick={() => openGroup(group)}
+                >
+                  <span className="min-w-0">
+                    <span className="block text-label text-muted-foreground">
+                      {correlationLabels[group.field]}
+                    </span>
+                    <span className="block truncate font-mono">
+                      {group.value}
+                    </span>
+                  </span>
+                  <span className="shrink-0 text-muted-foreground">
+                    {group.count} {group.count === 1 ? "event" : "events"}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {pager}
+        </>
+      ) : (
+        <div className="grid min-w-0 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+          <div className="@container min-w-0">
+            <div
+              aria-hidden="true"
+              className="grid grid-cols-[2.5rem_minmax(0,1fr)] border-b border-border bg-background"
             >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              disabled={currentPage + 1 === pageCount}
-              onClick={() => setPage(currentPage + 1)}
+              <div
+                className={
+                  eventColumns +
+                  " col-start-2 min-h-7 items-center gap-x-2 pr-3 text-label font-medium text-muted-foreground"
+                }
+              >
+                <span className="pl-1.5">Level</span>
+                <span>Timestamp</span>
+                <span className="hidden @[31rem]:block">Message</span>
+              </div>
+            </div>
+            <ol
+              aria-label={
+                mode === "Exceptions" ? "Events with exceptions" : "Log events"
+              }
+              key={mode + currentPage}
+              className="max-h-[min(40dvh,32rem)] divide-y divide-border overflow-y-auto"
             >
-              Next
-            </Button>
+              {activeEvents.map((event) => (
+                <EventRow
+                  key={event.index}
+                  event={event}
+                  selected={selected.has(event.index)}
+                  onSelect={(index, checked) => selectEvents([index], checked)}
+                  exceptionsFirst={mode === "Exceptions"}
+                  active={inspected?.index === event.index}
+                  onOpen={(index, trigger) => {
+                    rowTrigger.current = trigger;
+                    focusInspector.current = inspectedIndex !== index;
+                    setInspectedIndex(index);
+                    if (inspectedIndex === index)
+                      inspectorHeading.current?.focus({
+                        preventScroll: window.matchMedia("(min-width: 1024px)")
+                          .matches,
+                      });
+                  }}
+                />
+              ))}
+            </ol>
+            {pager}
           </div>
-        </nav>
+          <section
+            aria-labelledby="event-inspector-heading"
+            className="min-w-0 border-t border-border bg-surface lg:border-l lg:border-t-0"
+          >
+            <div className="flex min-h-8 items-center justify-between gap-2 border-b border-border bg-background px-3 py-1">
+              <h3
+                id="event-inspector-heading"
+                ref={inspectorHeading}
+                tabIndex={-1}
+                className="rounded-control text-label font-semibold"
+              >
+                {inspected ? "Event " + (inspected.index + 1) : "Event details"}
+              </h3>
+              {inspected && (
+                <Button
+                  variant="ghost"
+                  className="min-h-6 px-1.5 py-0 text-label"
+                  onClick={closeInspector}
+                >
+                  Back to events
+                </Button>
+              )}
+            </div>
+            {inspected ? (
+              <EventDetails
+                key={mode + inspected.index}
+                event={inspected}
+                exceptionsFirst={mode === "Exceptions"}
+              />
+            ) : (
+              <EmptyState title="No event selected">
+                Open an event to inspect its fields, payloads, or raw text.
+              </EmptyState>
+            )}
+          </section>
+        </div>
       )}
     </section>
   );

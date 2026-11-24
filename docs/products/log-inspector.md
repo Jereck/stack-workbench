@@ -7,9 +7,9 @@ Log Inspector helps backend and application support engineers follow failing API
 ## Workflow
 
 1. Paste log text in the Monaco editor, open or drop one UTF-8 file, or select a synthetic example.
-2. Choose **Parse logs**. The detected format appears beside the actions. Choose a format override to parse again with a different interpretation. **Cancel** interrupts an active read, parse, or export.
+2. Choose **Parse logs** or press **Ctrl/Command + Enter** in the workbench. Use **Expand editor** for more input space or **Hide input** to give results more room. The detected format appears beside the actions. Choose a format override to parse again with a different interpretation. **Cancel** interrupts an active read, parse, or export.
 3. Review severity totals, the timestamp range, payload and exception counts, and parsing warnings. Search messages, raw events, and decoded payload text. Combine severity and exact identifier filters with input order or timestamp sorting.
-4. Expand an event to inspect normalized metadata, raw text, properties, or a decoded payload. Open **Correlations** to follow an exact trace, correlation, or request ID. Groups are distinct by identifier type and include IDs found on a single event. Open **Exceptions** for events with recognized errors, nested causes, and stack traces.
+4. Open an event to inspect it in the detail pane. Switch between Overview, Properties, Payloads, Exception, and Raw event when available. On narrow screens the detail pane sits below the list. **Back to events** returns focus to the opened row. Open **Correlations** to follow an exact trace, correlation, or request ID. Groups are distinct by identifier type and include IDs found on a single event. Open **Exceptions** for events with recognized errors, nested causes, and stack traces.
 5. Select events individually or by page, then download the selection or all filtered results as JSON or readable text. Redaction is enabled by default with independently configurable categories.
 
 ## Supported input
@@ -35,15 +35,15 @@ Redaction masks common Authorization headers and bearer tokens, API keys, passwo
 
 ## Processing and display limits
 
-| Limit                                                                           | Behavior                                                                                                                    |
-| ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 4 MiB of UTF-8, one file at a time                                              | Oversized input is rejected and the existing workspace remains available                                                    |
-| 20,000 events                                                                   | If more records remain, the final row retains the remaining raw text                                                        |
-| 48 JSON or XML container levels                                                 | Deep or structurally dense data remains accessible as raw text. JSON containers also have a 500,000 structural-marker limit |
-| 64 Ki UTF-16 code units per payload candidate                                   | Larger values remain accessible from the raw event or structured properties                                                 |
-| Four recursive decoding steps and 12 property levels                            | Further traversal stops with a warning where a limit is reached                                                             |
-| 24 extracted payloads, 512 visits, and a 256 Ki code-unit scan budget per event | Extraction stops at the applicable limit. A total 4 Mi code-unit output budget applies across the workspace                 |
-| 50 event or correlation rows per page                                           | Details render on demand. Large values have a selectable text preview and a full-value action                               |
+| Limit                                                                           | Behavior                                                                                                                            |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 4 MiB of UTF-8, one file at a time                                              | Oversized input is rejected and the existing workspace remains available                                                            |
+| 20,000 events                                                                   | If more records remain, the final row retains the remaining raw text                                                                |
+| 48 JSON or XML container levels                                                 | Deep or structurally dense data remains accessible as raw text. JSON containers also have a 500,000 structural-marker limit         |
+| 64 Ki UTF-16 code units per payload candidate                                   | Larger values remain accessible from the raw event or structured properties                                                         |
+| Four recursive decoding steps and 12 property levels                            | Further traversal stops with a warning where a limit is reached                                                                     |
+| 24 extracted payloads, 512 visits, and a 256 Ki code-unit scan budget per event | Extraction stops at the applicable limit. A total 4 Mi code-unit output budget applies across the workspace                         |
+| 50 event or correlation rows per page                                           | The selected event and its active detail view render on demand. Large values have a selectable text preview and a full-value action |
 
 ## Benchmark
 

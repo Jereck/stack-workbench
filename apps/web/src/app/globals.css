@@ -2,45 +2,88 @@
 @source "../../../../packages/ui/src";
 @source "../../../../tools/log-inspector/src";
 
+@font-face {
+  font-family: Geist;
+  src: url("/fonts/geist-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/geist-mono-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 @theme inline {
-  --font-sans:
-    "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: "Geist", "Inter", system-ui, sans-serif;
   --font-mono:
-    "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    "Geist Mono", "JetBrains Mono", "SFMono-Regular", Consolas,
+    "Liberation Mono", monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-secondary: var(--secondary);
   --color-muted-foreground: var(--muted-foreground);
   --color-surface: var(--surface);
-  --color-surface-muted: var(--surface-muted);
+  --color-surface-muted: var(--hover);
+  --color-sidebar: var(--sidebar);
   --color-border: var(--border);
+  --color-control-border: var(--control-border);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
-  --color-accent-soft: var(--accent-soft);
-  --color-terminal: #161c2b;
-  --color-terminal-border: #333e56;
-  --color-terminal-text: #e4eaf6;
-  --color-terminal-muted: #abb8cf;
+  --color-accent-soft: var(--selected);
+  --color-focus: var(--focus);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-syntax-key: var(--syntax-key);
+  --shadow-popover: var(--elevation);
+  --radius-control: var(--control-radius);
+  --radius-panel: var(--panel-radius);
+  --text-label: 0.75rem;
+  --text-label--line-height: 1rem;
+  --text-ui: 0.8125rem;
+  --text-ui--line-height: 1.125rem;
 }
 
 :root {
   color-scheme: light dark;
-  --background: light-dark(#f7f8fb, #11151e);
-  --foreground: light-dark(#181e2c, #edf0f8);
-  --muted-foreground: light-dark(#505c72, #abb7cd);
-  --surface: light-dark(#ffffff, #1a2130);
-  --surface-muted: light-dark(#eef1f7, #232d41);
-  --border: light-dark(#d7deeb, #35415a);
-  --accent: light-dark(#3d53c5, #a6b4ff);
-  --accent-hover: light-dark(#3044af, #c0caff);
-  --accent-foreground: light-dark(#ffffff, #17203e);
-  --accent-soft: light-dark(#e9edff, #293558);
+  --background: light-dark(#f7f7f8, #17181b);
+  --surface: light-dark(#ffffff, #1d1f23);
+  --sidebar: light-dark(#f0f1f3, #191b1f);
+  --foreground: light-dark(#1b1d23, #f0f1f3);
+  --secondary: light-dark(#424750, #c7cbd2);
+  --muted-foreground: light-dark(#5d636e, #a4aab5);
+  --border: light-dark(#e0e2e7, #33363e);
+  --control-border: light-dark(#8a909b, #707785);
+  --hover: light-dark(#eef0f3, #282b32);
+  --selected: light-dark(#e8eeff, #293550);
+  --accent: light-dark(#284eb9, #a7bfff);
+  --accent-hover: light-dark(#203e99, #c0d1ff);
+  --accent-foreground: light-dark(#ffffff, #16223d);
+  --focus: light-dark(#2852cf, #a7bfff);
+  --success: light-dark(#25624c, #8ed8b6);
+  --warning: light-dark(#80520a, #f0c47d);
+  --warning-soft: light-dark(#fff2dc, #3b3020);
+  --danger: light-dark(#a02843, #ffadbe);
+  --danger-soft: light-dark(#fae9ec, #412933);
+  --syntax-key: light-dark(#5341a0, #c8bbfc);
+  --control-radius: 5px;
+  --panel-radius: 8px;
+  --elevation: 0 8px 24px #0000001a;
+  --transition-fast: 120ms;
+  --workspace-rail: 13rem;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
 }
-
 :root[data-theme="dark"] {
   color-scheme: dark;
 }
@@ -50,12 +93,20 @@ body {
   color: var(--foreground);
 }
 
-a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
+:where(a, button, input, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
 ::selection {
-  background: var(--accent-soft);
+  background: var(--selected);
   color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+  }
 }
