@@ -51,7 +51,7 @@ test("pastes logs, explores results and downloads redacted copies locally", asyn
   );
   const editor = page.getByRole("textbox", { name: /Raw log text/ });
   await editor.focus();
-  await editor.press("Control+v");
+  await editor.press("ControlOrMeta+v");
   await parse(page, 4);
 
   await expect(page.getByText("Detected · JSON Lines / NDJSON")).toBeVisible();
@@ -141,7 +141,7 @@ test("pastes logs, explores results and downloads redacted copies locally", asyn
   ).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Parse logs" })).toBeDisabled();
   await expect(editor).toBeFocused();
-  await editor.press("Control+z");
+  await editor.press("ControlOrMeta+z");
   await expect(page.getByRole("button", { name: "Parse logs" })).toBeDisabled();
   expect(
     await page.evaluate(() => ({

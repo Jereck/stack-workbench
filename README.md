@@ -33,7 +33,7 @@ Open [localhost:3000](http://localhost:3000). Set `NEXT_TELEMETRY_DISABLED=1` in
 | `pnpm build`                            | Create the production web build                                                  |
 | `pnpm start`                            | Serve the production build locally                                               |
 
-Playwright starts the dev server locally if it is not already running. GitHub Actions uses a frozen install, runs formatting, lint, types, unit tests, and the build, then runs Playwright against the production build on port 3100.
+Playwright starts the dev server locally if it is not already running. GitHub Actions checks Linux, macOS, and Windows. It uses a frozen install, runs formatting, lint, types, unit tests, and the build, then runs Playwright against the production build on port 3100.
 
 ## Repository structure
 
@@ -57,4 +57,4 @@ Playwright starts the dev server locally if it is not already running. GitHub Ac
 
 Add its public metadata to the [tool registry](apps/web/src/lib/tools.ts). A planned entry gets a detail page automatically. Once the tool is functional, add its independent package under `tools/<slug>`, declare it as a web workspace dependency, and mount its entry point in an explicit App Router page. Reuse the tool page layout, add tests, and change the registry status to `available` in the same change. [Tool development guide](docs/architecture/tool-development.md)
 
-Use the [roadmap](ROADMAP.md) for candidate priorities and [AGENTS.md](AGENTS.md) for repository working conventions.
+Start with [project status](PROJECT_STATUS.md). The [development workflow](docs/development/workflow.md) covers machine setup and handoffs. See the [roadmap](ROADMAP.md) for candidate products and [AGENTS.md](AGENTS.md) for repository working conventions.

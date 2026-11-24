@@ -4,7 +4,8 @@ Customer demand will guide the sequencing and scope of planned work.
 
 ## P0
 
-- Log Inspector · browser-local MVP available. [Scope, limits, and benchmarks](docs/products/log-inspector.md)
+- Log Inspector · browser-local MVP implemented. Public release is pending. [Scope, limits, and benchmarks](docs/products/log-inspector.md)
+- First-release work is tracked in the [development backlog](docs/development/backlog.md).
 
 ## P1
 

@@ -9,4 +9,10 @@
 - Stay within the requested scope. Get explicit approval before deploying, committing, pushing, or creating paid infrastructure.
 - A change is done when its normal entry point works, required checks pass, and affected documentation is current.
 
+## Development continuity
+
+Before editing, read [PROJECT_STATUS.md](PROJECT_STATUS.md) and the applicable product, architecture, and decision documents. Inspect Git status and existing changes, confirm the requested scope, and preserve accepted architecture unless the task explicitly reconsiders it.
+
+Update relevant tests and docs and run the applicable validation. After meaningful work, refresh project status with results, incomplete work, and the next logical task. Update the backlog, changelog, and known issues when applicable. Follow the [development workflow](docs/development/workflow.md).
+
 See [architecture](docs/architecture/overview.md), [tool development](docs/architecture/tool-development.md), and [privacy and security](docs/architecture/privacy-and-security.md).

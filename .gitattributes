@@ -1,1 +1,2 @@
+# Use LF in the index and working tree regardless of core.autocrlf.
 * text=auto eol=lf

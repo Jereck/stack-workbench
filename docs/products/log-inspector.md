@@ -8,7 +8,7 @@ Log Inspector helps backend and application support engineers follow failing API
 
 1. Paste log text in the Monaco editor, open or drop one UTF-8 file, or select a synthetic example.
 2. Choose **Parse logs**. The detected format appears beside the actions. Choose a format override to parse again with a different interpretation. **Cancel** interrupts an active read, parse, or export.
-3. Review severity totals, the timestamp range, payload and exception counts, and parsing warnings. Search messages, raw events, and decoded payload text. Combine severity, exact identifier, and timeline filters as needed.
+3. Review severity totals, the timestamp range, payload and exception counts, and parsing warnings. Search messages, raw events, and decoded payload text. Combine severity and exact identifier filters with input order or timestamp sorting.
 4. Expand an event to inspect normalized metadata, raw text, properties, or a decoded payload. Open **Correlations** to follow an exact trace, correlation, or request ID. Groups are distinct by identifier type and include IDs found on a single event. Open **Exceptions** for events with recognized errors, nested causes, and stack traces.
 5. Select events individually or by page, then download the selection or all filtered results as JSON or readable text. Redaction is enabled by default with independently configurable categories.
 
