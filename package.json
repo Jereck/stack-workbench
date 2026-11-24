@@ -1,0 +1,30 @@
+{
+  "name": "stack-workbench",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.23.0",
+  "engines": {
+    "node": "^24.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @stack-workbench/web dev",
+    "build": "pnpm --filter @stack-workbench/web build",
+    "start": "pnpm --filter @stack-workbench/web start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit && pnpm --filter @stack-workbench/web typecheck",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/node": "24.19.2",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.6",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3",
+    "vite": "8.3.8",
+    "vitest": "5.1.1"
+  }
+}

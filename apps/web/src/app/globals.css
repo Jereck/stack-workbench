@@ -1,0 +1,61 @@
+@import "tailwindcss";
+@source "../../../../packages/ui/src";
+@source "../../../../tools/log-inspector/src";
+
+@theme inline {
+  --font-sans:
+    "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:
+    "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-terminal: #161c2b;
+  --color-terminal-border: #333e56;
+  --color-terminal-text: #e4eaf6;
+  --color-terminal-muted: #abb8cf;
+}
+
+:root {
+  color-scheme: light dark;
+  --background: light-dark(#f7f8fb, #11151e);
+  --foreground: light-dark(#181e2c, #edf0f8);
+  --muted-foreground: light-dark(#505c72, #abb7cd);
+  --surface: light-dark(#ffffff, #1a2130);
+  --surface-muted: light-dark(#eef1f7, #232d41);
+  --border: light-dark(#d7deeb, #35415a);
+  --accent: light-dark(#3d53c5, #a6b4ff);
+  --accent-hover: light-dark(#3044af, #c0caff);
+  --accent-foreground: light-dark(#ffffff, #17203e);
+  --accent-soft: light-dark(#e9edff, #293558);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--foreground);
+}

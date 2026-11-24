@@ -1,0 +1,11 @@
+{
+  "name": "@stack-workbench/payload-parser",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "saxes": "6.0.0"
+  }
+}

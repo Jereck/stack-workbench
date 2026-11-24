@@ -1,0 +1,28 @@
+{
+  "name": "@stack-workbench/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@stack-workbench/log-inspector": "workspace:*",
+    "@stack-workbench/shared": "workspace:*",
+    "@stack-workbench/ui": "workspace:*",
+    "lucide-react": "1.79.0",
+    "next": "16.4.6",
+    "next-themes": "0.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.5",
+    "@types/react": "19.3.1",
+    "@types/react-dom": "19.3.0",
+    "postcss": "8.5.33",
+    "tailwindcss": "4.3.5"
+  }
+}
