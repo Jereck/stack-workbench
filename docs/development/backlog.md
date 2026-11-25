@@ -10,6 +10,7 @@ See [project status](../../PROJECT_STATUS.md) for the latest verification and [k
 
 ## P1 · Important near-term improvements
 
+- **Complete Integration Compare Phase 3B.** Build and test the shared baseline/target workspace, presentation modes, rule editing, browser privacy, and both themes before registering the route as available. Continue with advanced workflows in 3C and tool transfer and premium capabilities in 3D. [Product checkpoint](../products/integration-compare.md)
 - **Resolve the timeline requirement.** Confirm whether the intended MVP needs time-window filtering in addition to sorting. If approved, cover start and end boundaries, missing timestamps, and combined severity and identifier filters. If sorting is sufficient, record the agreed scope.
 - **Fill browser verification gaps.** Exercise file and paste input, keyboard navigation, worker startup, and downloads in any additional browsers the product intends to support. Record explicit support limits and reproduce any browser-specific issues with synthetic inputs.
 - **Measure interaction at the input cap.** Run the existing synthetic benchmark on representative hosts and measure explorer search, sorting, and export separately. Record the test setup and numbers, then prioritize changes against observed delays.

@@ -10,6 +10,8 @@
 
 ## Platform and release verification
 
+- Integration Compare has a tested engine and worker. The real route, workspace, and production integration remain pending. The engine benchmark covers a standalone bundled fixture. [Integration Compare scope and engine limits](../products/integration-compare.md)
+
 - The feedback route reports that submissions are unavailable. It provides no form or delivery mechanism.
 - Current browser automation targets Chromium. Coverage for Safari and Firefox remains open.
 - The checked-in CSP restricts framing, base URLs, embedded objects, and form actions. It has no script or connection allowlist. The release host's headers, logging, and retention require review before a public release. [Privacy and security architecture](../architecture/privacy-and-security.md)

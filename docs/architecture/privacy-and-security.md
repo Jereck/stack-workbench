@@ -12,6 +12,10 @@ The browser loads the local editor and worker assets from the site origin. The e
 
 The production browser test exercises pasted logs containing a synthetic marker, a log-controlled URL, and an XML document type declaration. It checks request URLs, headers and bodies, WebSocket traffic, and local and session storage.
 
+## Integration Compare data flow
+
+Phase 3A uses structured browser messages to pass each input pair into a dedicated worker. The worker compares inputs in memory and returns structured evidence. Completion or cancellation terminates the worker. XML document parsing rejects DTDs. HTTP addresses and imported content are treated as data. The browser fixture verifies that a synthetic marker appears in no request URL, header, body, or console message and that local, session, and IndexedDB storage stay empty. The production route requires a separate privacy check in Phase 3B. [Integration Compare product guide](../products/integration-compare.md)
+
 ## Requirements for tools
 
 - Free workflows should read and process data in the browser whenever possible. Use in-memory state by default, release input references on reset, and move CPU-intensive work to a browser worker if measurements warrant it.

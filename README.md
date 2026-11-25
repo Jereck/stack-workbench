@@ -2,6 +2,8 @@
 
 StackWorkbench is a privacy-first suite of developer utilities for inspecting, comparing, validating, and monitoring applications, APIs, and integrations. Its first tool, Log Inspector, searches application logs, decodes payloads, and exports redacted events in the browser. [Log Inspector product guide](docs/products/log-inspector.md)
 
+Integration Compare is in development. Its comparison engine and browser worker are validated, with the workspace due in Phase 3B. [Integration Compare scope, limits, and benchmark](docs/products/integration-compare.md)
+
 ## Stack and prerequisites
 
 - Next.js App Router, React, and strict TypeScript.
@@ -37,21 +39,22 @@ Playwright starts the dev server locally if it is not already running. GitHub Ac
 
 ## Repository structure
 
-| Path                                                     | Responsibility                                                |
-| -------------------------------------------------------- | ------------------------------------------------------------- |
-| [`apps/web`](apps/web)                                   | Website routes, branding, site composition, and tool registry |
-| [`tools`](tools)                                         | Workspace location for independent tool packages              |
-| [`packages/ui`](packages/ui)                             | Shared React UI primitives                                    |
-| [`packages/shared`](packages/shared)                     | Framework-independent tool types and category definitions     |
-| [`packages/log-parser`](packages/log-parser)             | Log format detection, event normalization, and exploration    |
-| [`packages/payload-parser`](packages/payload-parser)     | Bounded decoding and JSON, XML, and SOAP detection            |
-| [`packages/redaction-engine`](packages/redaction-engine) | Configurable redaction for export copies                      |
-| [`docs/architecture`](docs/architecture)                 | Boundaries, tool development, privacy, and security           |
-| [`docs/business`](docs/business)                         | Strategy and pricing hypotheses                               |
-| [`docs/products`](docs/products)                         | Product specifications                                        |
-| [`docs/decisions`](docs/decisions)                       | Architecture decision records                                 |
-| [`tests`](tests)                                         | Unit tests, browser tests, and fixture guidance               |
-| [`.github/workflows`](.github/workflows)                 | CI                                                            |
+| Path                                                       | Responsibility                                                |
+| ---------------------------------------------------------- | ------------------------------------------------------------- |
+| [`apps/web`](apps/web)                                     | Website routes, branding, site composition, and tool registry |
+| [`tools`](tools)                                           | Workspace location for independent tool packages              |
+| [`packages/ui`](packages/ui)                               | Shared React UI primitives                                    |
+| [`packages/shared`](packages/shared)                       | Framework-independent tool types and category definitions     |
+| [`packages/log-parser`](packages/log-parser)               | Log format detection, event normalization, and exploration    |
+| [`packages/payload-parser`](packages/payload-parser)       | Bounded decoding and JSON, XML, and SOAP detection            |
+| [`packages/comparison-engine`](packages/comparison-engine) | Typed local payload comparison and matching                   |
+| [`packages/redaction-engine`](packages/redaction-engine)   | Configurable redaction for export copies                      |
+| [`docs/architecture`](docs/architecture)                   | Boundaries, tool development, privacy, and security           |
+| [`docs/business`](docs/business)                           | Strategy and pricing hypotheses                               |
+| [`docs/products`](docs/products)                           | Product specifications                                        |
+| [`docs/decisions`](docs/decisions)                         | Architecture decision records                                 |
+| [`tests`](tests)                                           | Unit tests, browser tests, and fixture guidance               |
+| [`.github/workflows`](.github/workflows)                   | CI                                                            |
 
 ## Add a tool
 

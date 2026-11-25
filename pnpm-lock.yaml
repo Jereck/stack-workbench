@@ -253,6 +253,15 @@ importers:
         specifier: 4.3.5
         version: 4.3.5
 
+  packages/comparison-engine:
+    dependencies:
+      '@stack-workbench/log-parser':
+        specifier: workspace:*
+        version: link:../log-parser
+      '@stack-workbench/payload-parser':
+        specifier: workspace:*
+        version: link:../payload-parser
+
   packages/log-parser:
     dependencies:
       '@stack-workbench/payload-parser':
@@ -287,6 +296,12 @@ importers:
       react:
         specifier: 19.3.1
         version: 19.3.1
+
+  tools/integration-compare:
+    dependencies:
+      '@stack-workbench/comparison-engine':
+        specifier: workspace:*
+        version: link:../../packages/comparison-engine
 
   tools/log-inspector:
     dependencies:

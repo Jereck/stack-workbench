@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added the Phase 3A Integration Compare engine and cancellable browser worker for JSON, XML and SOAP, text, HTTP, and supported logs. The upcoming workspace will expose the engine through the tool directory.
+
 - Redesigned the homepage and searchable tool directory around the available Log Inspector, with a real parsed preview of its synthetic example.
 - Added a responsive workspace shell, local sidebar preference, compact Log Inspector input and filters, and a dedicated event inspector with keyboard navigation.
 - Documented the shared light and dark design system and self-hosted Geist typography.

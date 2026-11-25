@@ -1,6 +1,6 @@
 # Project status
 
-**Current phase** · Phase 1 Log Inspector MVP release hardening. The public site and Log Inspector workspace have been redesigned. Public release readiness remains pending.
+**Current phase** · Integration Compare Phase 3A engine and browser worker checkpoint. Phase 3B workspace is next. Log Inspector remains the available tool, with public release hardening pending.
 
 **Redesign baseline** · Clean `feature/design-system` at `5988436` on 2026-11-24. The checked-in Log Inspector spec, architecture docs, and accepted ADRs define the scope.
 
@@ -15,13 +15,38 @@
 
 The homepage uses a preview derived from the bundled synthetic sample. The directory searches the registry and lists available tools by category. At `/tools/log-inspector`, the app shell groups tools in a collapsible sidebar, and the tool keeps event details in an adjacent inspector on desktop. The current data view stacks on mobile. Geist and Geist Mono are served locally. [Design system](docs/design/design-system.md)
 
-The web app owns routing and the registry. The tool owns UI and worker orchestration. Separate workspace packages handle normalization, payload decoding, and export redaction. The continuity audit preserves all three accepted ADRs.
+The web app owns routing and the registry. Tool packages own UI and worker orchestration. Separate workspace packages handle normalization, payload decoding, comparison, and export redaction.
+
+## Integration Compare checkpoint
+
+| Phase                    | Status                                                                                                                                                                                                                                                             |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 3A · Engine              | Implemented and tested. Framework-independent comparison of JSON, XML and SOAP, text, HTTP, and supported normalized logs. Includes typed rules, array matching, observed-structure mode, bounded results and actionable errors, and a cancellable browser worker. |
+| 3B · Workspace           | Pending. Add the dedicated route, registration and navigation, two editable inputs, comparison views, rule editor, and responsive browser and privacy validation.                                                                                                  |
+| 3C · Advanced workflows  | Pending. Add log-session and transaction matching, regression observations, batch comparison, local profiles, and reports.                                                                                                                                         |
+| 3D · Product integration | Pending. Add local Log Inspector transfers, central typed entitlements, development simulation, and accurate upgrade entry points.                                                                                                                                 |
+
+The new engine is in `packages/comparison-engine`. `tools/integration-compare` exports the worker adapter. Both reuse existing parser packages. ADR 0004 records the comparison boundary. [Product scope and benchmarks](docs/products/integration-compare.md) · [ADR 0004](docs/decisions/0004-integration-comparison-engine.md)
 
 ## Current work and blockers
 
-Release work remains open for input admission, production validation across the OS matrix, and release-host privacy verification. The original wording about timeline filters needs a product decision. No other tool is in implementation.
+Log Inspector release work remains open for input admission, production validation across the OS matrix, and release-host privacy verification. The timeline filter needs a product decision. Integration Compare becomes discoverable when the Phase 3B route and workspace pass browser validation.
 
 ## Latest validation
+
+2026-11-25 · Windows 11 build 26200, Node.js 24.21.0, pnpm 12.23.0, and Playwright Chromium 159.0.8154.6.
+
+| Check                                           | Result                                                                                                                                                                                   |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frozen install, format, lint, and type checking | Passed. The lockfile adds two workspace importers.                                                                                                                                       |
+| Unit tests                                      | 45 passed in six files.                                                                                                                                                                  |
+| Production build                                | Passed with Turbopack.                                                                                                                                                                   |
+| Chromium browser tests                          | 11 passed. Nine cover the production site and Log Inspector. Two exercise the bundled worker fixture, including termination and restart, DTD rejection, and network and storage privacy. |
+| Performance                                     | Six synthetic workloads measured worker processing and browser round-trip time. [Benchmark and limits](docs/products/integration-compare.md)                                             |
+
+Integration Compare theme, responsive layout, keyboard, and Next.js route checks belong to Phase 3B. Release-host and additional OS and browser checks are tracked in the backlog.
+
+### Previous Log Inspector redesign validation
 
 2026-11-24 · macOS 26.6.2 arm64, Node.js 24.21.0, pnpm 12.23.0, and Chromium 159.0.8154.6 (Playwright 1.65.1).
 
@@ -37,6 +62,6 @@ Loopback access required an approved local retry for the build and browser check
 
 ## Next task
 
-Harden editor input admission with synthetic regression coverage. Review keyboard behavior in Safari and Firefox, verify the full OS matrix, resolve the timeline requirement, and validate privacy on the chosen release host once authorized.
+Build the Phase 3B Integration Compare workspace in the existing shell. Wire its worker adapter, add the explorer and alternate views, and validate input retention, privacy, cancellation, accessibility, and both themes on the real route. Log Inspector release hardening stays in the development backlog.
 
 [Workflow](docs/development/workflow.md) · [Backlog](docs/development/backlog.md) · [Known issues](docs/development/known-issues.md) · [Changelog](CHANGELOG.md) · [Log Inspector spec](docs/products/log-inspector.md) · [Architecture](docs/architecture/overview.md) · [ADRs](docs/decisions)

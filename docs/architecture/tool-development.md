@@ -14,3 +14,5 @@ The directory groups records into Inspect, Compare, Validate, and Monitor. The d
 4. Add unit tests for the processing and browser tests for the user workflow, including keyboard access and input privacy. Verify the directory entry links to the working route and refresh the product spec.
 
 Follow the [design system](../design/design-system.md) for toolbar, status, and inspector patterns. Keep domain-specific views and filtering in the tool package. Keep processing pure where possible. Handle malformed input with actionable messages, preserve access to valid results when appropriate, and use synthetic fixtures. Extract a processing engine when it has confirmed reuse or needs an independent runtime boundary.
+
+For worker-backed tools, define a typed message contract and test completion, cancellation, and failure recovery. When the processor is introduced before its route, test the bundled worker through a loopback fixture and run privacy checks again through the real workspace once mounted. [Integration Compare worker decision](../decisions/0004-integration-comparison-engine.md)

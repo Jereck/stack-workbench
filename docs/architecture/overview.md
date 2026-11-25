@@ -16,6 +16,8 @@ The web app may depend on tools and shared packages. Tool packages may depend on
 
 Log Inspector puts its browser UI, worker entry point, and export formatting in `tools/log-inspector`. `packages/log-parser` owns normalized events and calls `packages/payload-parser` for bounded decoding. `packages/redaction-engine` masks export copies. Those packages work independently of React, Next.js, and browser DOM APIs. [ADR 0003](../decisions/0003-log-inspector-workers.md)
 
+Integration Compare uses `packages/comparison-engine` for framework-independent comparison, matching, and rules. It reuses log normalization and the shared payload parser, including whole-document XML parsing. `tools/integration-compare` owns the browser worker adapter. The web route and workspace are Phase 3B. [ADR 0004](../decisions/0004-integration-comparison-engine.md)
+
 ## Future locations
 
 Create these only when a product requires them.

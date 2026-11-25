@@ -1,0 +1,11 @@
+{
+  "name": "@stack-workbench/integration-compare",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./worker": "./src/worker-client.ts"
+  },
+  "dependencies": {
+    "@stack-workbench/comparison-engine": "workspace:*"
+  }
+}

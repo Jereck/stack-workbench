@@ -9,7 +9,7 @@ Customer demand will guide the sequencing and scope of planned work.
 
 ## P1
 
-- Semantic Payload Compare
+- Integration Compare · Phase 3A engine validated. Workspace, advanced workflows, and premium integration are pending. [Scope and phase boundaries](docs/products/integration-compare.md)
 - Configuration Diff
 - Exception Explorer
 - Schema Validator
