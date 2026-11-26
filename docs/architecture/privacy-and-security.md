@@ -8,7 +8,7 @@ The web server sets a no-referrer policy, disables MIME sniffing, and sets a con
 
 ## Log Inspector data flow
 
-The browser loads the local editor and worker assets from the site origin. The editor and file reader keep input in memory. A dedicated browser worker produces normalized events from the input. A separate operation generates an export from selected or filtered results and returns a local Blob. Untrusted strings render as text and XML parsing rejects document type declarations. Clearing the workspace resets the editor and its undo history, releases derived state, and stops the current operation. Explicit copy and download actions create user-controlled copies. [Log Inspector product guide](../products/log-inspector.md)
+The browser loads the local editor and worker assets from the site origin. The editor and file reader keep input in memory. The workspace checks the UTF-8 byte cap before accepting files and applying editor changes, and the parser verifies the cap before processing. A dedicated browser worker produces normalized events from the input. A separate operation generates an export from selected or filtered results and returns a local Blob. Untrusted strings render as text and XML parsing rejects document type declarations. Clearing the workspace resets the editor and its undo history, releases derived state, and stops the current operation. Explicit copy and download actions create user-controlled copies. [Log Inspector product guide](../products/log-inspector.md)
 
 The production browser test exercises pasted logs containing a synthetic marker, a log-controlled URL, and an XML document type declaration. It checks request URLs, headers and bodies, WebSocket traffic, and local and session storage.
 

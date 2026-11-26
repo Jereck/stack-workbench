@@ -1,17 +1,17 @@
 # Project status
 
-**Current phase** · Integration Compare Phase 3D product integration checkpoint. The next milestone is release hardening for both tools.
+**Current phase** · Release hardening for Log Inspector and Integration Compare after the Phase 3D integration checkpoint.
 
 **Redesign baseline** · Clean `feature/design-system` at `5988436` on 2026-11-24. The checked-in Log Inspector spec, architecture docs, and accepted ADRs define the scope.
 
 ## Implemented and partial work
 
-| Area                        | Status                                                                                                                                                                                                                                                                                             |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Phase 0 platform foundation | Implemented site shell, homepage, tool directory, route metadata, planned-tool pages, 404, About and Privacy pages, theme preference, CI and workspace tests. Feedback is informational and accepts no submissions.                                                                                |
-| Phase 1 input and parsing   | Implemented Monaco paste/edit, single local file and drop, examples, cancellation, detection and override, and malformed record recovery. Supports text/mixed, JSON/NDJSON, Serilog, and CloudWatch within the documented formats. File and parser limits exist. Editor admission remains partial. |
-| Phase 1 exploration         | Implemented summary, warnings, severity and text search, ID filtering and correlation groups, timestamp sorting, pagination, raw and normalized details, exceptions, and embedded JSON/XML/SOAP inspection. A time-window filter is absent.                                                        |
-| Phase 1 export and privacy  | Implemented selected and filtered JSON/text downloads with default configurable masking, raw copy, same-origin workers, and Clear with undo reset. Masking is best effort. Release hosting has yet to be verified.                                                                                 |
+| Area                        | Status                                                                                                                                                                                                                                                                                         |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase 0 platform foundation | Implemented site shell, homepage, tool directory, route metadata, planned-tool pages, 404, About and Privacy pages, theme preference, CI and workspace tests. Feedback is informational and accepts no submissions.                                                                            |
+| Phase 1 input and parsing   | Implemented Monaco paste/edit, single local file and drop, examples, cancellation, detection and override, and malformed record recovery. Supports text/mixed, JSON/NDJSON, Serilog, and CloudWatch. The 4 MiB UTF-8 limit is enforced at file admission, before editor edits, and at parsing. |
+| Phase 1 exploration         | Implemented summary, warnings, severity and text search, ID filtering and correlation groups, timestamp sorting, pagination, raw and normalized details, exceptions, and embedded JSON/XML/SOAP inspection. A time-window filter is absent.                                                    |
+| Phase 1 export and privacy  | Implemented selected and filtered JSON/text downloads with default configurable masking, raw copy, same-origin workers, and Clear with undo reset. Masking is best effort. Release hosting has yet to be verified.                                                                             |
 
 The homepage uses a preview derived from the bundled synthetic sample. The directory searches the registry and lists available tools by category. At `/tools/log-inspector`, the app shell groups tools in a collapsible sidebar, and the tool keeps event details in an adjacent inspector on desktop. The current data view stacks on mobile. Geist and Geist Mono are served locally. [Design system](docs/design/design-system.md)
 
@@ -30,9 +30,22 @@ The engine is in `packages/comparison-engine`. `tools/integration-compare` owns 
 
 ## Current work and blockers
 
-Log Inspector release work remains open for editor input admission and the timeline filter decision. Both tools still require release-host, cross-platform, and assistive-technology verification. Production grants Free, and locked Pro controls explain that subscriptions are unavailable. Verified account entitlements and subscription billing are tracked separately.
+Log Inspector rejects edits over the byte cap before they modify the input. Native Safari and screen-reader verification remain open. The repository has no configured release URL for checking deployed headers, TLS, logging and retention. The timeline filter decision remains in the backlog. Production grants Free, and verified account entitlements and subscription billing are tracked separately.
 
 ## Latest validation
+
+2026-11-26 · Release hardening on Windows 11 build 26200 with Node.js 24.21.0, pnpm 12.23.0, and Playwright 1.65.1.
+
+| Check                                                             | Result                                                                                                                                                                                                                                                   |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frozen install, format, lint, type checking, and production build | Passed. No dependency or lockfile changes.                                                                                                                                                                                                               |
+| Unit tests                                                        | 63 passed in nine files.                                                                                                                                                                                                                                 |
+| Browser tests                                                     | 25 production Chromium and 11 development Chromium tests passed. Three smoke cases also passed in Firefox 159.0 and WebKit 27.2.                                                                                                                         |
+| Ubuntu 24.04.1 under WSL2                                         | Frozen install, format, lint, types, build, 63 unit tests, and all 36 Chromium browser tests passed in an isolated checkout. Chromium used local copies of the required runtime libraries.                                                               |
+| Keyboard, accessibility, and layout                               | Verified editor Tab exit, shortcuts, event-detail focus and return, and the limit status as a polite live region in Chromium. Reviewed the limit notice with existing results at 1280 and 390 px in both themes, with no page-level horizontal overflow. |
+| Privacy and headers                                               | Both production routes returned the checked security headers on loopback. The release smoke workflow loaded only same-origin resources and kept its synthetic marker out of requests and storage. The deployed host requires separate verification.      |
+
+### Previous Phase 3D validation
 
 2026-11-25 · Phase 3D on Windows 11 build 26200, Node.js 24.21.0, pnpm 12.23.0, and Playwright Chromium 159.0.8154.6.
 
@@ -97,10 +110,10 @@ Additional OS, browser, assistive-technology, and release-host checks are tracke
 | Production browser tests        | 9 passed. Covered discovery, directory search, mobile use, keyboard parsing and inspector focus, sidebar and theme preferences, paging, file and paste input, cancellation, payloads, errors, and redacted downloads. The synthetic privacy flow checked same-origin requests, no log marker in captured traffic, and no stored workspace data. |
 | Visual and contrast review      | Captured before views and reviewed the redesigned homepage, directory, empty workspace, and parsed workspace at 1440, 1280, 1024, and 390 px in both themes. No page-level horizontal overflow. The 14 checked semantic token pairs met the applicable AA contrast thresholds in both themes.                                                   |
 
-Loopback access required an approved local retry for the build and browser checks. The production browser tests ran on macOS. The Linux and Windows CI jobs, Safari and Firefox, assistive technology, and release-host verification remain open. The pinned dependencies and lockfile are unchanged.
+Loopback access required an approved local retry for the build and browser checks. The production browser tests ran on macOS. The Linux and Windows CI jobs, Safari and Firefox, assistive technology, and release-host verification were still open at this checkpoint. The pinned dependencies and lockfile were unchanged.
 
 ## Next task
 
-Run the release hardening checklist for both tools, starting with cross-browser support and the release host's headers, logging, and retention. Resolve Log Inspector editor admission before public release. Plan verified account entitlements and billing as a separate implementation.
+Finish release sign-off in native Safari and with a screen reader. When a release host is available, verify its TLS, effective security headers, logs and retention, and rerun the synthetic privacy workflow against it. Plan verified account entitlements and billing as a separate implementation.
 
 [Workflow](docs/development/workflow.md) · [Backlog](docs/development/backlog.md) · [Known issues](docs/development/known-issues.md) · [Changelog](CHANGELOG.md) · [Log Inspector spec](docs/products/log-inspector.md) · [Architecture](docs/architecture/overview.md) · [ADRs](docs/decisions)

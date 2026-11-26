@@ -17,7 +17,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000). The app needs no account, service credentials, or database. To disable Next.js CLI telemetry for local commands, set `$env:NEXT_TELEMETRY_DISABLED = "1"` in PowerShell or `export NEXT_TELEMETRY_DISABLED=1` in Bash or zsh. CI and the Playwright-managed server set it explicitly.
+Open [http://localhost:3000](http://localhost:3000). The app needs no account, service credentials, or database. To disable Next.js CLI telemetry for local commands, set `$env:NEXT_TELEMETRY_DISABLED = "1"` in PowerShell or `export NEXT_TELEMETRY_DISABLED=1` in Bash or zsh. CI and the Playwright-managed server set it explicitly.
 
 ## Validate changes
 
@@ -34,6 +34,8 @@ pnpm test:e2e
 Run type checking and build sequentially because both generate files under `apps/web/.next`. Local Playwright starts the dev server on loopback port 3000 or reuses a running one. Ensure that port belongs to this checkout. To mirror production CI, build first and set `CI=1` for the shell that runs Playwright (`$env:CI = "1"` in PowerShell or `export CI=1` in Bash or zsh). That run starts the production server on port 3100 and expects the port to be free. Restore your normal shell environment afterward.
 
 The Playwright development project opens Pro through the development simulator. Under CI it starts a separate dev server on port 3101. The primary Chromium project verifies Free access on the production build. Use `pnpm exec playwright test --project=chromium-development` for the simulator and Pro workflows.
+
+For the release smoke suite, install the additional browsers with `pnpm exec playwright install firefox webkit`. Build first, then set `CI=1` and `STACK_WORKBENCH_RELEASE_BROWSERS=1` in the Playwright shell. Run `pnpm exec playwright test --grep @release` to exercise Chromium, Firefox, and WebKit against the production server. This mode runs without the development server. The smoke suite covers the editor limit, keyboard focus, accessibility roles, handoffs, downloads, and local privacy. Native Safari and screen-reader verification are separate release checks.
 
 The committed lockfile includes platform-specific optional native packages for the build and test stack. Keep optional dependencies enabled. Reinstall on the destination machine and let Playwright install its matching browser there.
 

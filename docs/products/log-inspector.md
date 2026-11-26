@@ -21,7 +21,7 @@ Log Inspector helps backend and application support engineers follow failing API
 | Serilog                   | Compact JSON fields and timestamped text with bracketed levels                                                                       |
 | CloudWatch                | Common `events` and `logEvents` wrappers, recognized per-event records, and Logs Insights field-value rows                           |
 
-Format detection tries a whole JSON container and then samples up to 32 non-empty lines. When a structured record fails to parse, the explorer keeps its raw text and surfaces a warning. A text override keeps JSON records as text. File input and a full replacement paste preserve the original text received by the browser. Editing in Monaco can normalize line endings. JSON arrays preserve original event value slices, and the editor retains the complete input including outer separators and envelopes.
+Format detection tries a whole JSON container and then samples up to 32 non-empty lines. When a structured record fails to parse, the explorer keeps its raw text and surfaces a warning. A text override keeps JSON records as text. File input and a full replacement paste preserve the original text received by the browser until the next edit. The editor normalizes line endings when loading a file or applying edits. JSON arrays preserve original event value slices, and the editor retains the complete input including outer separators and envelopes.
 
 Events expose the metadata present in supported fields and prefixes. Timeline sorting uses timestamps with explicit offsets and supported epoch values. Timestamp strings without a recognized offset remain visible with their original text and stay in input order after comparable timestamps. Plain-text pattern detection is heuristic. Custom text layouts, arbitrary field aliases, streaming input, and compressed files are outside the MVP.
 
@@ -39,7 +39,7 @@ Redaction masks common Authorization headers and bearer tokens, API keys, passwo
 
 | Limit                                                                           | Behavior                                                                                                                            |
 | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| 4 MiB of UTF-8, one file at a time                                              | Oversized input is rejected and the existing workspace remains available                                                            |
+| 4 MiB of UTF-8, one file at a time                                              | Files, pastes, and edits are checked before they change the editor. A rejected change preserves the text and parsed results.        |
 | 20,000 events                                                                   | If more records remain, the final row retains the remaining raw text                                                                |
 | 48 JSON or XML container levels                                                 | Deep or structurally dense data remains accessible as raw text. JSON containers also have a 500,000 structural-marker limit         |
 | 64 Ki UTF-16 code units per payload candidate                                   | Larger values remain accessible from the raw event or structured properties                                                         |

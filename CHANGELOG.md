@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Enforced Log Inspector's 4 MiB UTF-8 cap before applying pastes or edits, including multiple-cursor edits. Rejected changes preserve the current input and results.
+- Added opt-in release smoke tests for Firefox and WebKit alongside Chromium, covering keyboard workflows, local handoffs, downloads, and privacy.
 - Connected Log Inspector and Integration Compare with a one-time, on-device transfer of decoded payloads and Pro log sessions.
 - Added typed Free and Pro capabilities, a development-only simulator, and inline Pro availability details.
 - Added recorded log-session comparison with transaction matching, explicit correlation-group pairs, manual overrides, and source-linked regression observations.

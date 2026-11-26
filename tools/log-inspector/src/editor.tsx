@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import type { editor } from "monaco-editor/editor/editor.api.js";
-import { MAX_INPUT_BYTES } from "@stack-workbench/log-parser";
+import { inputExceedsLimit } from "@stack-workbench/log-parser";
+import { limitEditorEdits } from "./editor-limit";
 
 export type LogEditor = editor.IStandaloneCodeEditor;
 
@@ -12,14 +13,14 @@ export function Editor({
   onChange,
   onReady,
   onOriginalPaste,
-  onPasteLimit,
+  onInputLimit,
   heightClass,
 }: {
   editorRef: RefObject<LogEditor | null>;
   onChange: (hasInput: boolean) => void;
   onReady: () => void;
   onOriginalPaste: (text: string) => void;
-  onPasteLimit: () => void;
+  onInputLimit: () => void;
   heightClass: string;
 }) {
   const host = useRef<HTMLDivElement>(null);
@@ -100,6 +101,11 @@ export function Editor({
             invisibleCharacters: false,
           },
         });
+        const model = instance.getModel();
+        if (model) {
+          model.setEOL(editor.EndOfLineSequence.LF);
+          limitEditorEdits(model, onInputLimit);
+        }
         void document.fonts
           .load('13px "Geist Mono"')
           .then(() => {
@@ -107,33 +113,29 @@ export function Editor({
           })
           .catch(() => undefined);
         editorRef.current = instance;
-        const change = instance.onDidChangeModelContent(() =>
-          onChange(Boolean(instance.getModel()?.getValueLength())),
-        );
+        const change = instance.onDidChangeModelContent(({ isFlush }) => {
+          // Monaco can restore the platform default after replacing or clearing the text.
+          if (isFlush) model?.setEOL(editor.EndOfLineSequence.LF);
+          onChange(Boolean(model?.getValueLength()));
+        });
         function capturePaste(event: ClipboardEvent) {
           const text = event.clipboardData?.getData("text/plain");
-          const model = instance.getModel();
-          const selections = instance.getSelections();
-          if (!text || !model || !selections) return;
-          const selectedLength = selections.reduce(
-            (total, selection) =>
-              total + model.getValueLengthInRange(selection),
-            0,
-          );
+          const [selection, ...others] = instance.getSelections() ?? [];
           if (
-            model.getValueLength() + text.length - selectedLength >
-            MAX_INPUT_BYTES
-          ) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            onPasteLimit();
-            return;
-          }
-          if (
-            selections.length !== 1 ||
-            selectedLength !== model.getValueLength()
+            !text ||
+            !model ||
+            !selection ||
+            others.length ||
+            model.getValueLengthInRange(selection) !== model.getValueLength()
           )
             return;
+          // A full paste can be parsed from the original clipboard text, including its line endings.
+          if (inputExceedsLimit(text)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            onInputLimit();
+            return;
+          }
           const version = model.getVersionId();
           queueMicrotask(() => {
             if (active && model.getVersionId() !== version)
@@ -168,7 +170,7 @@ export function Editor({
       active = false;
       dispose?.();
     };
-  }, [editorRef, onChange, onReady, onOriginalPaste, onPasteLimit]);
+  }, [editorRef, onChange, onReady, onOriginalPaste, onInputLimit]);
 
   return (
     <div className="relative">

@@ -1,7 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { formats, MAX_INPUT_BYTES } from "@stack-workbench/log-parser";
+import {
+  formats,
+  inputExceedsLimit,
+  MAX_INPUT_BYTES,
+} from "@stack-workbench/log-parser";
 import type {
   LogEvent,
   LogFormat,
@@ -100,7 +104,7 @@ export function LogInspector({ handoff }: { handoff?: CompareHandoff } = {}) {
   const rememberPaste = useCallback((text: string) => {
     original.current = text;
   }, []);
-  const pasteLimit = useCallback(() => setNotice(limitMessage), []);
+  const inputLimit = useCallback(() => setNotice(limitMessage), []);
 
   function clear() {
     stop();
@@ -124,7 +128,8 @@ export function LogInspector({ handoff }: { handoff?: CompareHandoff } = {}) {
   }
 
   function setText(text: string) {
-    editor.current?.setValue(text);
+    // Normalize the editor copy without expanding mixed line endings. Parsing can still use the original.
+    editor.current?.setValue(text.replace(/\r\n?/g, "\n"));
     original.current = text;
     setHasInput(Boolean(text));
     setDirty(true);
@@ -267,7 +272,7 @@ export function LogInspector({ handoff }: { handoff?: CompareHandoff } = {}) {
     const model = editor.current.getModel();
     if (!model) return;
     const text = original.current ?? model.getValue(undefined, true);
-    if (text.length > MAX_INPUT_BYTES) {
+    if (inputExceedsLimit(text)) {
       setNotice(limitMessage);
       return;
     }
@@ -468,7 +473,7 @@ export function LogInspector({ handoff }: { handoff?: CompareHandoff } = {}) {
             onChange={changed}
             onReady={editorReady}
             onOriginalPaste={rememberPaste}
-            onPasteLimit={pasteLimit}
+            onInputLimit={inputLimit}
             heightClass={
               expandedEditor
                 ? "h-[min(52dvh,32rem)]"
