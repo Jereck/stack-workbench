@@ -3,7 +3,7 @@
 import { ArrowRight, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { toolCategories } from "@stack-workbench/shared";
+import { toolCategories, toolPricingLabels } from "@stack-workbench/shared";
 import type { ToolDefinition } from "@stack-workbench/shared";
 import { controlClass, EmptyState } from "@stack-workbench/ui/workspace";
 import { CategoryIcon } from "./category-icon";
@@ -19,7 +19,12 @@ function ToolRows({ tools }: { tools: ToolDefinition[] }) {
           >
             <CategoryIcon category={tool.category} />
             <span className="min-w-0">
-              <span className="block text-sm font-semibold">{tool.name}</span>
+              <span className="flex flex-wrap items-baseline gap-x-2 text-sm font-semibold">
+                {tool.name}
+                <span className="text-label font-normal text-muted-foreground">
+                  {toolPricingLabels[tool.pricing]}
+                </span>
+              </span>
               <span className="block text-ui text-muted-foreground">
                 {tool.description}
               </span>

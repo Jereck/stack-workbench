@@ -16,7 +16,11 @@ The web app may depend on tools and shared packages. Tool packages may depend on
 
 Log Inspector puts its browser UI, worker entry point, and export formatting in `tools/log-inspector`. `packages/log-parser` owns normalized events and calls `packages/payload-parser` for bounded decoding. `packages/redaction-engine` masks export copies. Those packages work independently of React, Next.js, and browser DOM APIs. [ADR 0003](../decisions/0003-log-inspector-workers.md)
 
-Integration Compare uses `packages/comparison-engine` for framework-independent comparison, matching, and rules. It reuses log normalization and the shared payload parser, including whole-document XML parsing. `tools/integration-compare` owns the browser worker adapter. The web route and workspace are Phase 3B. [ADR 0004](../decisions/0004-integration-comparison-engine.md)
+Integration Compare uses `packages/comparison-engine` for framework-independent comparison, matching, and rules. It reuses log normalization and the shared payload parser, including whole-document XML parsing. `tools/integration-compare` owns the browser worker adapter and workspace. `apps/web` mounts it at `/tools/integration-compare`. Both tools use the shared code and clipboard view in `packages/ui`. [ADR 0004](../decisions/0004-integration-comparison-engine.md)
+
+Session matching and profile validation live in the comparison engine. The tool package manages in-memory batch execution, profile persistence, and report serialization with the shared redaction engine. [ADR 0005](../decisions/0005-comparison-advanced-workflows.md)
+
+The web app owns the on-device handoff and the production entitlement source. The tools consume shared transfer commands and capability snapshots through their route adapters. Integration Compare enforces its resolved capabilities in the workspace and its worker entry points. [ADR 0006](../decisions/0006-tool-handoff-and-entitlements.md)
 
 ## Future locations
 

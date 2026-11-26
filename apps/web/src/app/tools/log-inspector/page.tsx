@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { LogInspector } from "@stack-workbench/log-inspector";
 import { LogInspectorGuide } from "@/components/log-inspector-guide";
 import { WorkspaceShell } from "@/components/workspace-shell";
+import { LogInspectorEntry } from "@/components/log-inspector-entry";
+import { getToolEntitlements } from "@/lib/entitlements";
 import { findTool, listTools } from "@/lib/tools";
 
 const tool = findTool("log-inspector");
@@ -16,7 +17,7 @@ export default function LogInspectorPage() {
       tools={listTools().filter((entry) => entry.availability === "available")}
       guide={<LogInspectorGuide />}
     >
-      <LogInspector />
+      <LogInspectorEntry entitlements={getToolEntitlements()} />
     </WorkspaceShell>
   );
 }

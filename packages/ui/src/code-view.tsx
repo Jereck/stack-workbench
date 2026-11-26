@@ -1,5 +1,7 @@
+"use client";
+
 import { useState } from "react";
-import { Button } from "@stack-workbench/ui/button";
+import { Button } from "./button";
 
 type Language = "JSON" | "XML" | "SOAP" | "Text";
 const previewLength = 24_000;
@@ -94,13 +96,15 @@ export function CopyButton({
   text,
   label = "Copy",
 }: {
-  text: string;
+  text: string | (() => string);
   label?: string;
 }) {
   const [status, setStatus] = useState("");
   async function copy() {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(
+        typeof text === "string" ? text : text(),
+      );
       setStatus("Copied");
     } catch {
       setStatus("Clipboard unavailable");
@@ -126,10 +130,12 @@ export function CodeView({
   text,
   label,
   language = "Text",
+  copyText = text,
 }: {
   text: string;
   label: string;
   language?: Language;
+  copyText?: string;
 }) {
   const [full, setFull] = useState(false);
   const display = prettyCode(text, language);
@@ -143,7 +149,7 @@ export function CodeView({
     <div className="min-w-0 space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs font-semibold text-muted-foreground">{label}</p>
-        <CopyButton text={text} label={"Copy " + label.toLowerCase()} />
+        <CopyButton text={copyText} label={"Copy " + label.toLowerCase()} />
       </div>
       <pre
         aria-label={label}

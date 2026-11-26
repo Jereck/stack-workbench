@@ -109,6 +109,7 @@ describe("JSON payload comparison", () => {
     expect(result.differences).toEqual([
       {
         path: [0, "value"],
+        targetPath: [1, "value"],
         baseline: 2,
         target: 4,
         classification: "modified",

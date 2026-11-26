@@ -1,4 +1,4 @@
-import { ComparisonError } from "./error";
+import { ComparisonError, RestrictedFormatError } from "./error";
 import {
   detectLogLineFormat,
   detectStructuredLogFormat,
@@ -20,6 +20,7 @@ import type {
   InputData,
   ParsingWarning,
   PayloadData,
+  RestrictedInputFormat,
   Side,
 } from "./model";
 
@@ -157,6 +158,7 @@ export function parseInput(
   input: ComparisonInput,
   side: Side,
   config: ComparisonConfiguration,
+  blocked: readonly RestrictedInputFormat[] = [],
 ): {
   data: InputData;
   warnings: ParsingWarning[];
@@ -190,6 +192,7 @@ export function parseInput(
     if (detected !== "text") logFormat = detected;
   }
   if (format === "log" || (format === "auto" && logFormat)) {
+    if (blocked.includes("log")) throw new RestrictedFormatError("log");
     const logs = parseLogs(text, logFormat);
     for (const [message, count] of Object.entries(logs.summary.warnings)) {
       warnings.push({ side, message, count });
@@ -207,6 +210,7 @@ export function parseInput(
   }
   const autoHttp = format === "auto" && looksLikeHttp(text.trimStart());
   if (format === "http" || autoHttp) {
+    if (blocked.includes("http")) throw new RestrictedFormatError("http");
     const message = parseHttp(
       text.replace(/^\uFEFF/, ""),
       input.recordedDurationMs,

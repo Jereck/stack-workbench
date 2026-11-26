@@ -220,3 +220,14 @@ export const rulePresets: readonly {
     })),
   },
 ];
+
+export function validateComparisonConfiguration(
+  configuration: ComparisonConfiguration,
+): string | undefined {
+  try {
+    new Rules(configuration);
+  } catch (error) {
+    if (error instanceof ComparisonError) return error.message;
+    throw error;
+  }
+}

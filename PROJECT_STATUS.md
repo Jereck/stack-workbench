@@ -1,6 +1,6 @@
 # Project status
 
-**Current phase** · Integration Compare Phase 3A engine and browser worker checkpoint. Phase 3B workspace is next. Log Inspector remains the available tool, with public release hardening pending.
+**Current phase** · Integration Compare Phase 3D product integration checkpoint. The next milestone is release hardening for both tools.
 
 **Redesign baseline** · Clean `feature/design-system` at `5988436` on 2026-11-24. The checked-in Log Inspector spec, architecture docs, and accepted ADRs define the scope.
 
@@ -22,17 +22,58 @@ The web app owns routing and the registry. Tool packages own UI and worker orche
 | Phase                    | Status                                                                                                                                                                                                                                                             |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 3A · Engine              | Implemented and tested. Framework-independent comparison of JSON, XML and SOAP, text, HTTP, and supported normalized logs. Includes typed rules, array matching, observed-structure mode, bounded results and actionable errors, and a cancellable browser worker. |
-| 3B · Workspace           | Pending. Add the dedicated route, registration and navigation, two editable inputs, comparison views, rule editor, and responsive browser and privacy validation.                                                                                                  |
-| 3C · Advanced workflows  | Pending. Add log-session and transaction matching, regression observations, batch comparison, local profiles, and reports.                                                                                                                                         |
-| 3D · Product integration | Pending. Add local Log Inspector transfers, central typed entitlements, development simulation, and accurate upgrade entry points.                                                                                                                                 |
+| 3B · Workspace           | Implemented at `/tools/integration-compare`. Two editable inputs, discovery and navigation, searchable difference explorer, aligned and structural views, and editable rules.                                                                                      |
+| 3C · Advanced workflows  | Implemented. Recorded session and transaction matching, correlation group selection, manual matches, evidence-linked regression summaries, batch runs, settings-only local profiles, and reports.                                                                  |
+| 3D · Product integration | Implemented. Log Inspector stages payloads and parsed sessions for either side in the current tab. Typed capabilities govern comparison controls and worker operations. Production grants Free and development can simulate Pro.                                   |
 
-The new engine is in `packages/comparison-engine`. `tools/integration-compare` exports the worker adapter. Both reuse existing parser packages. ADR 0004 records the comparison boundary. [Product scope and benchmarks](docs/products/integration-compare.md) · [ADR 0004](docs/decisions/0004-integration-comparison-engine.md)
+The engine is in `packages/comparison-engine`. `tools/integration-compare` owns the workspace, worker, batch queue, profile storage, and report downloads. The tool uses the existing log, payload, and redaction packages. The shared package defines capabilities and tool handoff commands. The web app owns the entitlement source, simulator, and in-memory handoff. [Product scope and benchmarks](docs/products/integration-compare.md) · [ADR 0004](docs/decisions/0004-integration-comparison-engine.md) · [ADR 0005](docs/decisions/0005-comparison-advanced-workflows.md) · [ADR 0006](docs/decisions/0006-tool-handoff-and-entitlements.md)
 
 ## Current work and blockers
 
-Log Inspector release work remains open for input admission, production validation across the OS matrix, and release-host privacy verification. The timeline filter needs a product decision. Integration Compare becomes discoverable when the Phase 3B route and workspace pass browser validation.
+Log Inspector release work remains open for editor input admission and the timeline filter decision. Both tools still require release-host, cross-platform, and assistive-technology verification. Production grants Free, and locked Pro controls explain that subscriptions are unavailable. Verified account entitlements and subscription billing are tracked separately.
 
 ## Latest validation
+
+2026-11-25 · Phase 3D on Windows 11 build 26200, Node.js 24.21.0, pnpm 12.23.0, and Playwright Chromium 159.0.8154.6.
+
+| Check                                           | Result                                                                                                                                                                                                                             |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frozen install, format, lint, and type checking | Passed. The lockfile changes link existing workspace packages.                                                                                                                                                                     |
+| Unit tests                                      | 63 passed in nine files. Capability and handoff tests exercise format and settings gates, one-shot transfer, slot replacement, and UTF-8 limits.                                                                                   |
+| Production build                                | Passed. Both tool routes are prerendered, and the production browser bundle omits the simulator controls.                                                                                                                          |
+| Chromium browser tests                          | 33 passed across the production and development servers. The suite covers ignored client entitlement claims, Free comparisons, JSON and XML transfer, same-tab navigation, transfer privacy, and Pro session comparison and reset. |
+| Visual and responsive review                    | Checked the handoff actions and Free locked workflow in light and dark at 1440, 1280, and 390 px. The exercised layouts had no page-level horizontal overflow.                                                                     |
+| Performance                                     | Reran all six synthetic worker workloads. Median browser elapsed times were 6.4 to 185.2 ms. [Workloads, timings, and limits](docs/products/integration-compare.md#phase-3d-worker-recheck)                                        |
+
+### Previous Phase 3C validation
+
+2026-11-25 · Phase 3C on Windows 11 build 26200, Node.js 24.21.0, pnpm 12.23.0, and Playwright Chromium 159.0.8154.6.
+
+| Check                                           | Result                                                                                                                                                                                                               |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frozen install, format, lint, and type checking | Passed. The lockfile adds a link to the existing redaction package.                                                                                                                                                  |
+| Unit tests                                      | 58 passed in eight files. New coverage includes session matches and missing responses, profile validation, report evidence, redaction, and CSV and HTML escaping.                                                    |
+| Production build                                | Passed. Turbopack prerendered the Integration Compare route.                                                                                                                                                         |
+| Chromium browser tests                          | 28 passed, including six advanced-workflow cases for evidence drilldown, cross-session correlation groups, manual transaction pairing, batch profiles and cancellation, profile persistence, and redacted downloads. |
+| Visual and responsive review                    | Reviewed log sessions, batch, and profiles at 1440, 1280, and 390 px in light and dark themes. The exercised layouts had no page-level horizontal overflow.                                                          |
+| Performance                                     | Two 4,000-event sessions matched 2,000 HTTP transactions in a median 255.9 ms. A 24-pair HTTP batch completed in a median 319.7 ms. [Measurement details](docs/products/integration-compare.md)                      |
+
+### Previous Phase 3B validation
+
+2026-11-25 · Phase 3B on Windows 11 build 26200, Node.js 24.21.0, pnpm 12.23.0, and Playwright Chromium 159.0.8154.6.
+
+| Check                                           | Result                                                                                                                                                                                                                                          |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frozen install, format, lint, and type checking | Passed.                                                                                                                                                                                                                                         |
+| Unit tests                                      | 45 passed in six files, including relocated JSON and XML paths.                                                                                                                                                                                 |
+| Production build                                | Passed. Turbopack prerendered `/tools/integration-compare`.                                                                                                                                                                                     |
+| Chromium browser tests                          | 22 passed, including 11 on the Integration Compare route. Covered discovery, clipboard and keyboard use, files and drop, rules, aligned and structural results, cancellation, oversized input, clear and undo, and network and storage privacy. |
+| Visual and responsive review                    | Reviewed 1440 and 1280 px in both themes, 1024 px in light, and 390 px in dark. Automated checks exercised 390 px in both themes. No page-level horizontal overflow. The tested editor and primary-action text pairs met AA contrast.           |
+| Workspace performance                           | A production Chromium comparison of 6,000 changed records rendered the first 24 rows in a median 67.2 ms from Compare. [Benchmark details](docs/products/integration-compare.md)                                                                |
+
+Additional OS, browser, assistive-technology, and release-host checks are tracked in the backlog.
+
+### Previous Phase 3A validation
 
 2026-11-25 · Windows 11 build 26200, Node.js 24.21.0, pnpm 12.23.0, and Playwright Chromium 159.0.8154.6.
 
@@ -43,8 +84,6 @@ Log Inspector release work remains open for input admission, production validati
 | Production build                                | Passed with Turbopack.                                                                                                                                                                   |
 | Chromium browser tests                          | 11 passed. Nine cover the production site and Log Inspector. Two exercise the bundled worker fixture, including termination and restart, DTD rejection, and network and storage privacy. |
 | Performance                                     | Six synthetic workloads measured worker processing and browser round-trip time. [Benchmark and limits](docs/products/integration-compare.md)                                             |
-
-Integration Compare theme, responsive layout, keyboard, and Next.js route checks belong to Phase 3B. Release-host and additional OS and browser checks are tracked in the backlog.
 
 ### Previous Log Inspector redesign validation
 
@@ -62,6 +101,6 @@ Loopback access required an approved local retry for the build and browser check
 
 ## Next task
 
-Build the Phase 3B Integration Compare workspace in the existing shell. Wire its worker adapter, add the explorer and alternate views, and validate input retention, privacy, cancellation, accessibility, and both themes on the real route. Log Inspector release hardening stays in the development backlog.
+Run the release hardening checklist for both tools, starting with cross-browser support and the release host's headers, logging, and retention. Resolve Log Inspector editor admission before public release. Plan verified account entitlements and billing as a separate implementation.
 
 [Workflow](docs/development/workflow.md) · [Backlog](docs/development/backlog.md) · [Known issues](docs/development/known-issues.md) · [Changelog](CHANGELOG.md) · [Log Inspector spec](docs/products/log-inspector.md) · [Architecture](docs/architecture/overview.md) · [ADRs](docs/decisions)

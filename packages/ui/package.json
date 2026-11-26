@@ -4,6 +4,7 @@
   "type": "module",
   "exports": {
     "./button": "./src/button.tsx",
+    "./code-view": "./src/code-view.tsx",
     "./workspace": "./src/workspace.tsx"
   },
   "dependencies": {

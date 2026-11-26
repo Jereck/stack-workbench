@@ -1,8 +1,44 @@
 # Integration Compare
 
-**Status** · Phase 3A comparison engine and cancellable browser worker validated. The public workspace and registry entry are Phase 3B.
+**Status** · The Free workspace is available at [`/tools/integration-compare`](../../apps/web/src/app/tools/integration-compare/page.tsx). Pro workflows can be exercised using the development simulator. Subscriptions aren’t available yet.
 
 Integration Compare helps backend, enterprise integration, support, QA, DevOps, and data integration engineers find what changed between an expected result and an observed result. Typical comparisons include successful and failing API responses, payloads from two environments, and behavior before and after a deployment.
+
+## Workspace
+
+1. Paste, open, or drop one UTF-8 file into each side. Load a sample in either editor or load a sample pair. Use the optional labels for contexts such as DEV and QA. The editors resize independently, and the toolbar expands both together.
+2. Select **Compare** or press **Ctrl/Command + Enter** to run the comparison. Review the detected formats or select a format manually. Selecting **Application logs** also enables a log-format override. **Cancel** stops the worker or in-progress file reads.
+3. Use **Differences** to search field paths and value previews, filter by type, expand grouped paths, and inspect or copy individual values. The previous and next controls follow visible changes. Turn on **Show ignored** to review excluded evidence and its rule.
+4. Use **Side by side** to inspect aligned values or text lines with nearby context. Plain-text comparisons can copy a unified diff. Use **Structure** to open JSON and XML branches and jump from marked nodes into the explorer.
+5. Open **Rules** to add, edit, toggle, or remove rules, apply a preset, or change comparison settings. **Ignore this path** adds a rule from the active difference. Committing a rule or setting reruns the current comparison when inputs have already been compared. Editing or swapping the inputs requires selecting **Compare** again.
+
+**Clear workspace** resets the editors, undo history, labels, rules, and in-memory results across workflows. Batch and Session also provide individual clear actions. The selected result view is stored as a browser preference.
+
+## Recorded sessions and transactions
+
+1. Open **Log sessions**. Paste or open logs on each side and choose **Compare sessions**. Use the format override for a known Log Inspector format.
+2. Review severity, event counts, exceptions, payloads, correlation groups, and service participation. Open **HTTP transactions** or **Events** to inspect matches and unresolved groups.
+3. Open **Match correlation groups** to select one independently recorded group on each side. Search by group ID when the list is long. **Compare full sessions** restores the full input scope.
+4. Open **Manual transaction matching** and enter transaction numbers from the HTTP table. A manual match reserves both records before automatic matching. Remove the override to recalculate automatic matches.
+5. Open a regression observation’s evidence number to see its difference and source log records.
+
+The engine reuses normalized Log Inspector records. It joins an observed request and response within a session when an explicit request or transaction ID identifies one compatible pair. Across sessions it matches method and path after removing the origin, query, fragment, and trailing slashes. Recorded operation and configured exact JSON payload identifiers can also inform matching. Events use configured property identifiers, HTTP metadata and direction, recorded operation, message template, or exact message, in that order. Service names participate by default. Correlation IDs can differ across sessions. Timestamps establish no matches. Ambiguous keys retain their candidates.
+
+Findings show severity, service participation, recorded ordering, exceptions, HTTP status, explicit numeric millisecond durations, and semantic changes in captured request and response bodies. Competing payload captures produce a warning. The first 50 observations link to retained evidence. Each run retains up to 8,000 findings and displays an omission count. A missing record leaves execution outcomes unknown.
+
+## Batch and saved profiles
+
+In **Batch**, add and label pairs, paste inputs, and select a shared profile if desired. Each pair can override its format. **Run all pairs** queues sequential workers. The table marks equivalent, changed, and failed pairs. **Inspect** opens full evidence and report controls for a pair. Cancel stops the active worker and keeps completed summaries.
+
+Batch holds up to 128 pairs and 32 MiB of aggregate UTF-8 input, with the 4 MiB per-input limit. The queue runs one worker at a time and retains summaries. Inspecting a pair reruns it with its batch settings. These bounds cap workspace memory independently of generated evidence.
+
+In **Profiles**, create a profile from current settings or import a version 1 JSON file. Edit its name, description and formats, or replace its rules and session settings with the current workspace settings. You can duplicate, export, delete, or clear profiles. Apply a profile to the payload workspace here, or select it separately from the Log sessions or Batch toolbar.
+
+Profiles store settings only, under `stack-workbench-compare-profiles-v1`. Raw inputs, comparison labels, group IDs, manual matches, and results stay in memory. Review manually entered profile names, descriptions, identifiers, and paths for secrets before saving or exporting. Imports accept up to 64 KiB. Local storage supports up to 50 profiles within a combined 512 Ki UTF-16 code-unit budget.
+
+## Regression reports
+
+Open **Regression report** in a payload, session, or inspected batch-pair result. Choose Markdown, JSON, CSV, or printable HTML. Reports include labels, date, settings and rules, summary and evidence, warnings, and limitations. Captured values are omitted by default and redaction is enabled. Review exports before sharing. Open the downloaded HTML in a browser to print it. CSV guards against spreadsheet formula prefixes. Printable HTML escapes user data and blocks remote resources.
 
 ## Engine behavior
 
@@ -17,7 +53,7 @@ Integration Compare helps backend, enterprise integration, support, QA, DevOps, 
 
 Automatic detection prioritizes recognizable structured formats, HTTP start lines, and supported log signatures. Choose a format explicitly when several interpretations are possible. For example, select JSON for an ordinary payload shaped like compact Serilog. A failed parse returns actionable feedback and the original input. Malformed log rows remain available with parser warnings.
 
-Unordered arrays preserve duplicate counts. Ordinary unordered matching groups structural signatures. If applicable rules alter equality, a bounded matching algorithm seeks the maximum number of compatible pairs. Keyed matching only pairs unique identifiers. Missing or ambiguous records are reported individually with matching warnings. Paired records use the baseline index for their paths. Unpaired target records use the target index.
+Unordered arrays preserve duplicate counts. Ordinary unordered matching groups structural signatures. If applicable rules alter equality, a bounded matching algorithm seeks the maximum number of compatible pairs. Keyed matching only pairs unique identifiers. Missing or ambiguous records are reported individually with matching warnings. Rules use the baseline path for matched records. The explorer and structure view show the actual target path when a record moved. Unpaired target records use the target path.
 
 Observed structure mode compares object nesting and field types. JSON arrays compare their distinct observed element shapes. Changes in scalar values and the count of repeated shapes have no bearing on that mode. The result describes the inputs' observed structure. Formal JSON Schema and XSD validation are outside this phase.
 
@@ -27,20 +63,28 @@ Rules have stable IDs, an enabled flag, and a path or exact field-name selector.
 
 Exclude a specific timestamp, correlation ID, request ID, or GUID by selecting its path. Use field-name rules for selected JSON properties, XML elements or attributes, HTTP headers, and query parameters. XML name rules accept expanded names or a local name across namespaces. Rule presets cover selected HTTP tracing headers and common root request and correlation ID paths. Optional path rules adjust array matching, absolute numeric tolerance, case, and whitespace. Escaped JSON decoding is an explicit setting. Ignored changes retain their contributing rule and explanation.
 
-## Planned product access
+## Product access
 
-| Capability                                                                           | Free     | Pro      | Delivery                                                         |
-| ------------------------------------------------------------------------------------ | -------- | -------- | ---------------------------------------------------------------- |
-| Log Inspector                                                                        | Included | Included | Available at `/tools/log-inspector`                              |
-| Basic JSON, XML, and text comparison, side-by-side results, and basic filtering      | Included | Included | Comparison core in 3A. Workspace and filters in 3B.              |
-| Advanced rules and arrays, raw HTTP, and observed-structure analysis                 |          | Included | Comparison core in 3A. Controls in 3B. Capabilities gated in 3D. |
-| Session and transaction matching, batch runs, saved profiles, and regression reports |          | Included | Workflows in 3C. Capabilities gated in 3D.                       |
+| Capability                                                         | Free     | Pro      | Delivery                                                                             |
+| ------------------------------------------------------------------ | -------- | -------- | ------------------------------------------------------------------------------------ |
+| Log Inspector                                                      | Included | Included | All inspection, payload and export controls                                          |
+| JSON, XML and SOAP, and plain text                                 | Included | Included | Differences, side-by-side and structure views, basic filters, and exact-path ignores |
+| Advanced rules, arrays, HTTP, and observed-structure analysis      |          | Included | Wildcards, normalization, identifier matching, and schema differences                |
+| Log sessions, transaction matching, batches, profiles, and reports |          | Included | Recorded exchanges, manual matches, saved settings, and evidence exports             |
 
-Phase 3D will add the typed entitlement interface, development-only Free and Pro simulation, and a Free production default. Browser gating will control the commercial user experience. Future authentication and billing will provide verified entitlements through that interface. [Pricing hypotheses](../business/monetization.md)
+Production resolves entitlements in the web app and currently grants Free. To exercise Pro locally, run `pnpm dev` and select **Pro** under **Development tier**. The simulation stays in the same browser tab during client navigation. Refresh returns to Free, and changing tiers resets the open comparison workspace. Production builds omit the simulator. Client URL parameters, cookies, and browser preferences supply no entitlements.
+
+Treat these browser-side checks as a commercial UX boundary and assume users can modify browser execution. Future authentication and billing can supply a verified entitlement snapshot from the server boundary. [Entitlement decision](../decisions/0006-tool-handoff-and-entitlements.md) · [Pricing hypotheses](../business/monetization.md)
+
+## Start in Log Inspector
+
+Open an extracted JSON, XML, or SOAP payload in Log Inspector and choose **Send as baseline** or **Send as target**. You can stage both sides before selecting **Open Integration Compare**. Staging another input into the same slot replaces the staged copy. The source log and extracted payload stay available in the inspector while you stage.
+
+Pro users can also stage the original logs from a current successful parse, along with the detected or selected log format. Parse again after editing before staging a session. **Clear staged inputs** or **Clear workspace** discards the pending handoff. Both tools keep the data in the current browser document. Opening Integration Compare consumes the staged inputs once, and a refresh clears staged and received inputs.
 
 ## Privacy and processing limits
 
-The worker accepts input and configuration through structured browser messages. Engine and worker code process contents in memory and make no network or storage calls. Cancellation terminates the active worker and settles the job immediately. XML rejects DTDs and external entity declarations. HTTP parsing treats addresses as text. Parse errors use fixed messages and safe locations. The browser fixture verified same-origin assets, no synthetic input in request URLs, headers or bodies, and empty local, session, and IndexedDB storage.
+The worker accepts input and configuration through structured browser messages. Inputs, labels, active rules, and results stay in memory. Explicit profile saves persist validated settings. Cancellation terminates the active worker. XML rejects DTDs and external entity declarations. The workspace renders HTTP addresses and markup as text. Production-route browser tests verify same-origin requests and exclude synthetic input from network traffic and storage. Clipboard and download actions create copies the user controls.
 
 | Limit                                                                                                     | Behavior                                                                                                                                       |
 | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -71,6 +115,36 @@ Run `node tests/bench/integration-compare.mjs` from the repository root with pin
 
 Worker time includes parsing and comparison. Browser elapsed includes worker startup, structured cloning, and replacement workers for the sequential HTTP run. Cancellation of the large keyed comparison settled within the browser timer's 0.1 ms resolution after the cancel call. Workspace rendering and batch processing are outside these measurements.
 
-## Next phases
+## Phase 3B workspace measurement
 
-Phase 3B mounts the engine in the shared workspace with independent inputs and rules, an explorer, side-by-side and structure views, and keyboard and theme coverage. Phase 3C adds evidence-linked session matching, batch work, validated local profiles, and configurable redacted reports. Phase 3D adds explicit local transfers from Log Inspector and entitlement integration. Future product opportunities include account-backed entitlements and scheduled regression monitoring.
+On the same host, the production Next.js route compared two 148,891-byte JSON arrays of 6,000 synthetic records with the same numeric IDs and different quantities. Chromium recorded a median of 67.2 ms from **Compare** to the summary and first 24 difference rows in the DOM. Five runs after one warm-up ranged from 52.3 to 76.3 ms. The timing includes worker startup, parsing, comparison, result transfer, and the initial explorer render.
+
+## Phase 3C workflow measurements
+
+Measured on the same Windows host using the production Next.js route and headless Chromium. These are medians of five runs after one warm-up. Elapsed time includes worker startup, processing, and initial result rendering.
+
+| Synthetic workload                                                       |                  Input size | Browser elapsed, ms |
+| ------------------------------------------------------------------------ | --------------------------: | ------------------: |
+| Two sessions with 4,000 records and 2,000 matched HTTP transactions each | 1,098,249 / 1,086,329 bytes | 255.9 (248.3–298.7) |
+| Batch of 24 small HTTP response pairs                                    |           3,072 bytes total | 319.7 (312.8–347.6) |
+
+The session run used one captured request and response per transaction. The batch completed one worker at a time and retained 24 summaries. These measurements describe the tested workloads on one host.
+
+## Phase 3D worker recheck
+
+Reran the Phase 3A worker fixture on the same Windows host after adding capability checks. The fixture used simulated Pro to exercise all formats. Timings are medians over five runs after a warm-up. Input sizes match the Phase 3A table. Reported elapsed time includes worker startup and result transfer. It measures the worker fixture independently of routing and workspace rendering.
+
+| Synthetic workload            | Worker time, ms | Browser elapsed, ms |
+| ----------------------------- | --------------: | ------------------: |
+| Small JSON                    |             0.8 |                 6.4 |
+| Nested JSON, 6,000 items      |            28.0 |                47.4 |
+| Keyed JSON, 15,000 records    |            54.2 |                76.0 |
+| SOAP, 4,500 items             |            53.8 |                87.7 |
+| Normalized logs, 4,000 events |           120.4 |               167.2 |
+| 24 independent HTTP pairs     |            32.7 |               185.2 |
+
+The large keyed run settled within the timer's 0.1 ms resolution after cancellation. Remote endpoint execution and larger inputs remain outside the documented scope.
+
+## Next phase
+
+The next release work is to verify hosting and browser support. Account-backed entitlement verification and subscription billing are separate product work.

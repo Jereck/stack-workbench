@@ -15,7 +15,7 @@ const blank = /^[\t\n\r ]*$/;
 const normalize = (text: string) =>
   text.replace(/[\t\n\r ]+/g, " ").replace(/^ | $/g, "");
 
-function contentOf(element: XmlElement) {
+export function xmlContent(element: XmlElement) {
   if (
     !element.preserveSpace &&
     element.content.some(isElement) &&
@@ -44,7 +44,7 @@ function snapshot(
   return {
     name: element.name,
     attributes: element.attributes,
-    content: contentOf(element).map((node) =>
+    content: xmlContent(element).map((node) =>
       isElement(node)
         ? snapshot(node, config, semantic)
         : semantic
@@ -244,8 +244,8 @@ function compareContent(
   target: XmlElement,
   path: FieldPath,
 ) {
-  const left = contentOf(baseline);
-  const right = contentOf(target);
+  const left = xmlContent(baseline);
+  const right = xmlContent(target);
   const leftPaths = childPaths(left);
   const rightPaths = childPaths(right);
   const keys = diff.config.xml?.identityAttributes ?? [];
@@ -333,14 +333,24 @@ function compareContent(
         target: bIndex,
         label: segment[0] + "[" + segment[1] + "]",
       });
-    if (element)
-      visit(
-        diff,
-        a && isElement(a) ? a : undefined,
-        b && isElement(b) ? b : undefined,
-        childPath,
-      );
-    else {
+    if (element) {
+      const visitElement = () =>
+        visit(
+          diff,
+          a && isElement(a) ? a : undefined,
+          b && isElement(b) ? b : undefined,
+          childPath,
+        );
+      const targetSegment =
+        bIndex !== undefined ? rightPaths[bIndex] : undefined;
+      if (
+        aIndex !== undefined &&
+        targetSegment &&
+        targetSegment[1] !== segment[1]
+      )
+        diff.atTarget(childPath, [...path, ...targetSegment], visitElement);
+      else visitElement();
+    } else {
       const aText = a && !isElement(a) ? a : undefined;
       const bText = b && !isElement(b) ? b : undefined;
       compareLeaf(

@@ -3,10 +3,38 @@ export { MAX_RESULT_ROWS } from "./differences";
 export {
   MAX_INPUT_BYTES,
   inputExceedsLimit,
+  formats as logInputFormats,
 } from "@stack-workbench/log-parser";
-export { formatFieldPath, rulePresets } from "./rules";
+export type { LogFormat } from "@stack-workbench/log-parser";
+export {
+  formatFieldPath,
+  rulePresets,
+  validateComparisonConfiguration,
+} from "./rules";
+export { xmlContent } from "./xml-diff";
 export { serializeUnifiedDiff } from "./text-diff";
 export { inputFormats } from "./model";
+export { compareSessions, MAX_SESSION_FINDINGS } from "./session";
+export { validIdentifierPaths } from "./session-matching";
+export {
+  MAX_PROFILE_BYTES,
+  parseComparisonProfile,
+  readComparisonProfile,
+  serializeComparisonProfile,
+} from "./profiles";
+export type {
+  ManualTransactionMatch,
+  MatchIssue,
+  ObservedTransaction,
+  RegressionObservation,
+  SessionFinding,
+  SessionMatch,
+  SessionOptions,
+  SessionRequest,
+  SessionResult,
+  SessionSettings,
+  SessionSide,
+} from "./session-model";
 export type {
   ArrayStrategy,
   Baseline,
@@ -28,6 +56,7 @@ export type {
   MatchingWarning,
   ParsedInput,
   ParsingWarning,
+  RestrictedInputFormat,
   PayloadData,
   Side,
   SourceLocation,

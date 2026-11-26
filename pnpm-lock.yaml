@@ -212,6 +212,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@stack-workbench/integration-compare':
+        specifier: workspace:*
+        version: link:../../tools/integration-compare
       '@stack-workbench/log-inspector':
         specifier: workspace:*
         version: link:../../tools/log-inspector
@@ -302,6 +305,25 @@ importers:
       '@stack-workbench/comparison-engine':
         specifier: workspace:*
         version: link:../../packages/comparison-engine
+      '@stack-workbench/redaction-engine':
+        specifier: workspace:*
+        version: link:../../packages/redaction-engine
+      '@stack-workbench/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@stack-workbench/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      lucide-react:
+        specifier: 1.79.0
+        version: 1.79.0(@types/react@19.3.1)(react@19.3.1)
+      react:
+        specifier: 19.3.1
+        version: 19.3.1
+    devDependencies:
+      '@types/react':
+        specifier: 19.3.1
+        version: 19.3.1
 
   tools/log-inspector:
     dependencies:
@@ -311,6 +333,9 @@ importers:
       '@stack-workbench/redaction-engine':
         specifier: workspace:*
         version: link:../../packages/redaction-engine
+      '@stack-workbench/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@stack-workbench/ui':
         specifier: workspace:*
         version: link:../../packages/ui

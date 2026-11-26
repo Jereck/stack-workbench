@@ -29,6 +29,8 @@ Payloads include embedded or escaped JSON and XML, SOAP envelopes with SOAP 1.1 
 
 ## Privacy and redaction
 
+To start a comparison from an extracted JSON, XML, or SOAP payload, select **Send as baseline** or **Send as target** under **Compare this payload**. Stage both sides if needed, then select **Open Integration Compare**. The handoff uses the current tab and clears on refresh. Pro offers the same transfer for the complete original log text after a current successful parse. [Integration Compare workflow](integration-compare.md)
+
 Input, filters, and parsed results live in browser memory. Log Inspector sends no log data, stores no log history, and makes no requests to URLs read from logs. Monaco and both worker entry points ship as same-origin assets. **Clear workspace** removes the input, editor undo history, and derived results from the application and cancels active work. Explicit copy and download actions create copies that remain on the device after clearing.
 
 Redaction masks common Authorization headers and bearer tokens, API keys, passwords, client secrets, cookies, connection strings, and email addresses. It runs only on export copies and may mask an entire free-text value when it detects a sensitive field in an ambiguous representation. Automated redaction can miss secrets in custom fields, formats, or encodings. Review the exported file before sharing it.

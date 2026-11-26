@@ -1,5 +1,6 @@
 import type { LogFormat, LogResult } from "@stack-workbench/log-parser";
 import type { XmlElement } from "@stack-workbench/payload-parser";
+import type { SessionSettings } from "./session-model";
 
 export const inputFormats = {
   auto: "Automatic detection",
@@ -12,6 +13,7 @@ export const inputFormats = {
 } as const;
 
 export type InputFormat = keyof typeof inputFormats;
+export type RestrictedInputFormat = "http" | "log";
 export type Side = "baseline" | "target";
 
 export interface ComparisonInput {
@@ -77,6 +79,7 @@ export interface ComparisonProfile {
   baselineFormat?: InputFormat;
   targetFormat?: InputFormat;
   configuration: ComparisonConfiguration;
+  session?: SessionSettings;
 }
 
 export type DifferenceClassification =
@@ -97,6 +100,8 @@ export interface SourceLocation {
 
 export interface Difference {
   path: FieldPath;
+  /** Actual target path when matching pairs records at different locations. */
+  targetPath?: FieldPath;
   classification: DifferenceClassification;
   baseline?: ComparisonValue;
   target?: ComparisonValue;
@@ -174,6 +179,7 @@ export type ComparisonResult =
         side?: Side;
         message: string;
         location?: SourceLocation;
+        restrictedFormat?: RestrictedInputFormat;
       }[];
     })
   | (ParsedSides & {

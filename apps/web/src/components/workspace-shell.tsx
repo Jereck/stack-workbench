@@ -3,6 +3,7 @@
 import {
   ChevronRight,
   FileText,
+  GitCompareArrows,
   LockKeyhole,
   PanelLeft,
   PanelLeftClose,
@@ -10,7 +11,7 @@ import {
 import Link from "next/link";
 import { useId, useRef, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import { toolCategories } from "@stack-workbench/shared";
+import { toolCategories, toolPricingLabels } from "@stack-workbench/shared";
 import type { ToolDefinition } from "@stack-workbench/shared";
 import { Button } from "@stack-workbench/ui/button";
 import { Brand } from "./brand";
@@ -142,13 +143,24 @@ export function WorkspaceShell({
                       <li key={entry.id}>
                         <Link
                           href={"/tools/" + entry.slug}
+                          aria-label={entry.name}
+                          aria-description={toolPricingLabels[entry.pricing]}
                           aria-current={
                             entry.id === tool.id ? "page" : undefined
                           }
                           className="flex min-h-8 items-center gap-2 rounded-control px-2 text-ui hover:bg-surface-muted aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold aria-[current=page]:text-accent"
                         >
-                          <FileText size={15} aria-hidden />
-                          {entry.name}
+                          {entry.category === "compare" ? (
+                            <GitCompareArrows size={15} aria-hidden />
+                          ) : (
+                            <FileText size={15} aria-hidden />
+                          )}
+                          <span className="min-w-0 py-1">
+                            <span className="block">{entry.name}</span>
+                            <span className="block text-label font-normal text-muted-foreground">
+                              {toolPricingLabels[entry.pricing]}
+                            </span>
+                          </span>
                         </Link>
                       </li>
                     ))}

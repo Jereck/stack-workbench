@@ -22,12 +22,18 @@ import type { ExportFormat } from "./export";
 import { samples } from "./samples";
 import { ResultSummary } from "./summary";
 import type { WorkerReply, WorkerRequest } from "./worker";
+import type {
+  CompareHandoff,
+  CompareSide,
+  CompareTransfer,
+} from "@stack-workbench/shared/tool-handoff";
+import { CompareActions } from "./compare-actions";
 
 type Operation = "read" | WorkerRequest["type"];
 type Job = { type: Operation; dispose: () => void };
 const limitMessage = "Logs must be 4 MiB or smaller.";
 
-export function LogInspector() {
+export function LogInspector({ handoff }: { handoff?: CompareHandoff } = {}) {
   const editor = useRef<LogEditor>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const original = useRef<string | null>(null);
@@ -44,6 +50,11 @@ export function LogInspector() {
   const [dragging, setDragging] = useState(false);
   const [expandedEditor, setExpandedEditor] = useState(false);
   const [collapsedInput, setCollapsedInput] = useState(false);
+  const [transferError, setTransferError] = useState(false);
+  const staged = handoff?.staged.map(
+    ({ kind, side }) =>
+      (kind === "payload" ? "Payload" : "Log session") + " as " + side,
+  );
 
   const stop = useCallback(() => {
     const job = active.current;
@@ -103,6 +114,8 @@ export function LogInspector() {
     setDirty(false);
     setBusy(undefined);
     setNotice("Workspace cleared.");
+    handoff?.clear();
+    setTransferError(false);
     setDragging(false);
     setCollapsedInput(false);
     setExpandedEditor(false);
@@ -271,6 +284,21 @@ export function LogInspector() {
     categories: RedactionCategory[],
   ) {
     run({ type: "export", events, format: exportFormat, categories });
+  }
+
+  function stage(transfer: CompareTransfer) {
+    if (!handoff?.stage(transfer)) {
+      setTransferError(true);
+      return;
+    }
+    setTransferError(false);
+  }
+
+  function stageSession(side: CompareSide) {
+    if (!result || dirty || busy || !handoff?.canStageSession) return;
+    const text =
+      original.current ?? editor.current?.getModel()?.getValue(undefined, true);
+    if (text) stage({ kind: "session", side, text, logFormat: result.format });
   }
 
   let indicator = "Automatic format detection runs when you parse.";
@@ -484,8 +512,48 @@ export function LogInspector() {
           </div>
         </div>
       </section>
+      {handoff && staged && (staged.length > 0 || transferError) && (
+        <div className="flex flex-wrap items-center gap-2 border-b border-border bg-surface px-3 py-1.5">
+          <p role="status" className="text-label text-muted-foreground">
+            {transferError && "Could not stage this input. "}
+            {staged.length > 0 &&
+              staged.join(" · ") +
+                " ready in this tab. A refresh clears the transfer."}
+          </p>
+          {staged.length > 0 && (
+            <>
+              <Button variant="outline" onClick={handoff.open}>
+                Open Integration Compare
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  handoff.clear();
+                  setTransferError(false);
+                }}
+              >
+                Clear staged inputs
+              </Button>
+            </>
+          )}
+        </div>
+      )}
       {result ? (
         <div className="min-w-0">
+          {handoff?.canStageSession && result.events.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-1.5">
+              <CompareActions
+                source="session"
+                onSelect={stageSession}
+                disabled={dirty || Boolean(busy)}
+              />
+              {dirty && (
+                <span className="text-label text-muted-foreground">
+                  Parse again to send the current session.
+                </span>
+              )}
+            </div>
+          )}
           {dirty && (
             <p className="border-b border-border bg-warning-soft px-3 py-2 text-ui text-warning">
               Showing results from the last parse. Parse again to include your
@@ -498,6 +566,7 @@ export function LogInspector() {
             result={result}
             busy={Boolean(busy)}
             onExport={exportEvents}
+            onTransfer={handoff ? stage : undefined}
           />
         </div>
       ) : (

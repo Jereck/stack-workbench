@@ -80,6 +80,7 @@ export class Differences {
   };
   private visits = 0;
   private probing = false;
+  private targetPrefix?: { from: number; to: FieldPath };
 
   constructor(readonly config: ComparisonConfiguration) {
     this.rules = new Rules(config);
@@ -104,7 +105,36 @@ export class Differences {
     if (changed) this.statistics.totalDifferences++;
     const rows =
       classification === "unchanged" ? this.unchanged : this.differences;
-    if (rows.length < MAX_RESULT_ROWS) rows.push(difference);
+    if (rows.length < MAX_RESULT_ROWS) {
+      const targetPath =
+        difference.target !== undefined && this.targetPrefix
+          ? this.actualTargetPath(difference.path)
+          : undefined;
+      rows.push(targetPath ? { ...difference, targetPath } : difference);
+    }
+  }
+
+  private actualTargetPath(path: FieldPath): FieldPath {
+    const prefix = this.targetPrefix;
+    return prefix ? [...prefix.to, ...path.slice(prefix.from)] : path;
+  }
+
+  atTarget(path: FieldPath, targetPath: FieldPath, visit: () => void) {
+    if (
+      path.length === targetPath.length &&
+      path.every((part, index) => part === targetPath[index])
+    ) {
+      visit();
+      return;
+    }
+    const parent = this.targetPrefix;
+    const to = this.actualTargetPath(targetPath);
+    this.targetPrefix = { from: path.length, to };
+    try {
+      visit();
+    } finally {
+      this.targetPrefix = parent;
+    }
   }
 
   warn(
@@ -322,13 +352,13 @@ export class Differences {
         if (a && !b) unmatchedBaseline.push(a);
         if (b && !a) unmatchedTarget.push(b);
         if (a && b && this.config.includeUnchanged)
-          this.compare(a.value, b.value, [...path, a.index]);
+          this.comparePair(a, b, path);
       }
       const length = Math.max(unmatchedBaseline.length, unmatchedTarget.length);
       for (let index = 0; index < length; index++) {
         const a = unmatchedBaseline[index];
         const b = unmatchedTarget[index];
-        this.compare(a?.value, b?.value, [...path, a?.index ?? b?.index ?? 0]);
+        this.comparePair(a, b, path);
       }
     } else if (strategy.kind === "keyed") {
       const pairs = matchGroups(
@@ -364,16 +394,25 @@ export class Differences {
             explanation: message,
             rule: arrayRule,
           });
-        } else
-          this.compare(pair.baseline?.value, pair.target?.value, fieldPath);
+        } else this.comparePair(pair.baseline, pair.target, path);
       }
     } else if (strategy.kind === "unordered") {
       for (const pair of this.unordered(baseline, target, path))
-        this.compare(pair.baseline?.value, pair.target?.value, [
-          ...path,
-          pair.baseline?.index ?? pair.target?.index ?? 0,
-        ]);
+        this.comparePair(pair.baseline, pair.target, path);
     } else this.comparePositional(baseline, target, path);
+  }
+
+  private comparePair(
+    baseline: Entry<ComparisonValue> | undefined,
+    target: Entry<ComparisonValue> | undefined,
+    parent: FieldPath,
+  ) {
+    const path = [...parent, baseline?.index ?? target?.index ?? 0];
+    if (baseline && target && baseline.index !== target.index) {
+      this.atTarget(path, [...parent, target.index], () =>
+        this.compare(baseline.value, target.value, path),
+      );
+    } else this.compare(baseline?.value, target?.value, path);
   }
 
   private comparePositional(

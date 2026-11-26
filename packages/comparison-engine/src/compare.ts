@@ -1,6 +1,6 @@
 import { XmlParseError } from "@stack-workbench/payload-parser";
 import { Differences } from "./differences";
-import { ComparisonError } from "./error";
+import { ComparisonError, RestrictedFormatError } from "./error";
 import { parseInput } from "./input";
 import type {
   Baseline,
@@ -12,6 +12,7 @@ import type {
   InputData,
   ParsedInput,
   ParsingWarning,
+  RestrictedInputFormat,
   Target,
   TextComparison,
 } from "./model";
@@ -156,6 +157,8 @@ function compareData(
 }
 
 function errorDetails(error: unknown, fallback: string) {
+  if (error instanceof RestrictedFormatError)
+    return { message: error.message, restrictedFormat: error.format };
   return error instanceof ComparisonError || error instanceof XmlParseError
     ? { message: error.message, location: error.location }
     : { message: fallback };
@@ -165,15 +168,24 @@ export function compareInputs(
   baseline: Baseline,
   target: Target,
   configuration: ComparisonConfiguration = {},
+  blockedFormats: readonly RestrictedInputFormat[] = [],
 ): ComparisonResult {
   const inputs = { baseline, target };
   const parsingWarnings: ParsingWarning[] = [];
-  const errors: { side?: "baseline" | "target"; message: string }[] = [];
+  const errors: Extract<
+    ComparisonResult,
+    { status: "failed" }
+  >["errors"][number][] = [];
   const parsed: { baseline?: ParsedInput; target?: ParsedInput } = {};
   for (const side of ["baseline", "target"] as const) {
     try {
       const input = inputs[side];
-      const { data, warnings } = parseInput(input, side, configuration);
+      const { data, warnings } = parseInput(
+        input,
+        side,
+        configuration,
+        blockedFormats,
+      );
       parsed[side] = { input, data };
       parsingWarnings.push(...warnings);
     } catch (error) {

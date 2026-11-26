@@ -14,7 +14,9 @@ The production browser test exercises pasted logs containing a synthetic marker,
 
 ## Integration Compare data flow
 
-Phase 3A uses structured browser messages to pass each input pair into a dedicated worker. The worker compares inputs in memory and returns structured evidence. Completion or cancellation terminates the worker. XML document parsing rejects DTDs. HTTP addresses and imported content are treated as data. The browser fixture verifies that a synthetic marker appears in no request URL, header, body, or console message and that local, session, and IndexedDB storage stay empty. The production route requires a separate privacy check in Phase 3B. [Integration Compare product guide](../products/integration-compare.md)
+The workspace reads local files in browser memory and passes each pair into a dedicated worker through structured browser messages. Completion or cancellation terminates the worker. Clear releases input, results, and editor undo history across comparison modes. XML document parsing rejects DTDs. The workspace renders HTTP addresses and markup as text. Local storage holds the selected result view and explicitly saved, validated settings profiles. Profile fields can contain sensitive user-entered strings, so the workspace explains their scope before saving. Reports are built in a worker and downloaded locally. Printable reports block network resources. Browser tests exercise same-origin requests and check synthetic markers against traffic, console output, and storage. [Integration Compare product guide](../products/integration-compare.md)
+
+Explicit handoff commands stage a copy in app-owned memory for the current browser document. The destination consumes the inbox once and releases the intermediate copy. Refresh and the source clear actions discard pending data. Browser tests check that transfers leave URLs, history state, request data, console output, and persistent storage free of synthetic input. [ADR 0006](../decisions/0006-tool-handoff-and-entitlements.md)
 
 ## Requirements for tools
 

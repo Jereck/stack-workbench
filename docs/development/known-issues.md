@@ -8,9 +8,12 @@
 - **Format and scale limits are intentional.** Plain text parsing is heuristic. One UTF-8 file, built-in formats, and bounded extraction are the current scope. Streaming, compressed input, and arbitrary field aliases remain outside that scope. See [supported input and limits](../products/log-inspector.md).
 - **Filtering and sorting run on the UI thread.** The existing benchmark measures parsing and first render on a Windows machine. It does not establish latency for repeated filtering, sorting, or export at the input cap.
 
-## Platform and release verification
+## Integration Compare
 
-- Integration Compare has a tested engine and worker. The real route, workspace, and production integration remain pending. The engine benchmark covers a standalone bundled fixture. [Integration Compare scope and engine limits](../products/integration-compare.md)
+- Session matching compares captured records. Repeated identifiers or multiple candidates need a more specific selector or a manual match. Batch keeps summary rows and regenerates full evidence for the inspected pair. Explorer search uses paths, rules, and bounded value previews. [Integration Compare scope and limits](../products/integration-compare.md)
+- Cross-tool handoffs last for the current browser document. Refresh or opening another tab requires staging the inputs again. Production grants Free until the app can verify account entitlements. [Handoff and entitlements](../decisions/0006-tool-handoff-and-entitlements.md)
+
+## Platform and release verification
 
 - The feedback route reports that submissions are unavailable. It provides no form or delivery mechanism.
 - Current browser automation targets Chromium. Coverage for Safari and Firefox remains open.

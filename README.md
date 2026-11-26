@@ -2,7 +2,9 @@
 
 StackWorkbench is a privacy-first suite of developer utilities for inspecting, comparing, validating, and monitoring applications, APIs, and integrations. Its first tool, Log Inspector, searches application logs, decodes payloads, and exports redacted events in the browser. [Log Inspector product guide](docs/products/log-inspector.md)
 
-Integration Compare is in development. Its comparison engine and browser worker are validated, with the workspace due in Phase 3B. [Integration Compare scope, limits, and benchmark](docs/products/integration-compare.md)
+Integration Compare compares payloads, raw HTTP, and recorded log sessions in the browser. Its workspace supports batch runs, locally saved profiles, and regression reports backed by the comparison evidence. [Integration Compare scope, limits, and benchmark](docs/products/integration-compare.md)
+
+Production uses the Free tier. Run `pnpm dev` and choose **Pro** in the Integration Compare **Development tier** control to verify premium workflows locally.
 
 ## Stack and prerequisites
 

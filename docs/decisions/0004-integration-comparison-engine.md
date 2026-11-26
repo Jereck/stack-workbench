@@ -10,9 +10,9 @@ Integration Compare must compare multiple recorded formats deterministically and
 
 Put the comparison model, rules, format adapters, matching, and results in `packages/comparison-engine`. Reuse the log parser and add full-document parsing to the existing XML parser alongside its prefix mode for embedded payloads. Keep both parser roles under the same namespace-aware, DTD-rejecting scanner. Store raw input and parsed representations alongside comparison evidence in memory.
 
-The independent tool package owns the worker message contract and starts one dedicated worker per job. A successful result, cancellation, or transport failure releases that worker. The web app will mount the route and own registry metadata in Phase 3B.
+The independent tool package owns the worker message contract and starts one dedicated worker per job. A successful result, cancellation, or transport failure releases that worker. The web app mounts the tool through the shared workspace shell and owns registry metadata.
 
-Match structured data by type and path. When users select identifiers, require unique candidates and show missing and ambiguous matches. Use bounded alignment work, explicit failures and notices, and separate counts from retained row limits.
+Match structured data by type and path. When users select identifiers, require unique candidates and show missing and ambiguous matches. Use the baseline path for rules and attach the actual target path to relocated matches so the structure view can mark the correct node. Use bounded alignment work, explicit failures and notices, and separate counts from retained row limits.
 
 ## Consequences
 

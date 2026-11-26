@@ -116,6 +116,15 @@ describe("XML and SOAP comparison", () => {
       kind: "missing-match",
       path: ["root", "items", 0, "item", 2],
     });
+    expect(result.differences).toContainEqual(
+      expect.objectContaining({
+        classification: "modified",
+        path: ["root", "items", 0, "item", 0, "#text", 0],
+        targetPath: ["root", "items", 0, "item", 1, "#text", 0],
+        baseline: "1",
+        target: "7",
+      }),
+    );
     const duplicates = compare(
       '<root><item id="1"/><item id="1"/></root>',
       '<root><item id="1"/></root>',
