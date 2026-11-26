@@ -9,6 +9,7 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@stack-workbench/integration-compare": "workspace:*",
     "@stack-workbench/log-inspector": "workspace:*",
     "@stack-workbench/shared": "workspace:*",
     "@stack-workbench/ui": "workspace:*",

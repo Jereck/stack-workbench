@@ -5,6 +5,8 @@ const config: NextConfig = {
   devIndicators: false,
   poweredByHeader: false,
   transpilePackages: [
+    "@stack-workbench/comparison-engine",
+    "@stack-workbench/integration-compare",
     "@stack-workbench/log-inspector",
     "@stack-workbench/log-parser",
     "@stack-workbench/payload-parser",

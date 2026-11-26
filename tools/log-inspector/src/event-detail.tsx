@@ -2,8 +2,10 @@ import { useState } from "react";
 import { viewButtonClass } from "@stack-workbench/ui/workspace";
 import type { ReactNode } from "react";
 import type { LogEvent, LogException } from "@stack-workbench/log-parser";
-import { CodeView, CopyButton } from "./code-view";
+import { CodeView, CopyButton } from "@stack-workbench/ui/code-view";
 import { levelLabels, levelStyles } from "./summary";
+import type { CompareTransfer } from "@stack-workbench/shared/tool-handoff";
+import { CompareActions } from "./compare-actions";
 
 export const eventColumns =
   "grid grid-cols-[3.75rem_minmax(0,1fr)] @[31rem]:grid-cols-[3.75rem_12.5rem_minmax(0,1fr)]";
@@ -73,9 +75,11 @@ function Properties({
 export function EventDetails({
   event,
   exceptionsFirst,
+  onTransfer,
 }: {
   event: LogEvent;
   exceptionsFirst: boolean;
+  onTransfer?: (transfer: CompareTransfer) => void;
 }) {
   const views = [
     "Overview",
@@ -191,6 +195,26 @@ export function EventDetails({
                 label="Decoded payload"
                 language={payload.kind}
               />
+              {onTransfer && payload.kind !== "Text" && (
+                <div className="mt-2">
+                  <CompareActions
+                    source="payload"
+                    onSelect={(side) =>
+                      onTransfer({
+                        kind: "payload",
+                        side,
+                        text: payload.text,
+                        format:
+                          payload.kind === "JSON"
+                            ? "json"
+                            : payload.kind === "SOAP"
+                              ? "soap"
+                              : "xml",
+                      })
+                    }
+                  />
+                </div>
+              )}
               {payload.original !== undefined && (
                 <div className="mt-2">
                   <DetailSection label="Original encoded value">

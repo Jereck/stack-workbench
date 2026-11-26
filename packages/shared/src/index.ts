@@ -31,10 +31,18 @@ export interface ToolDefinition {
   readonly category: ToolCategory;
   readonly availability: "planned" | "available";
   readonly processing: "browser" | "server" | "hybrid";
-  readonly pricing: "free" | "professional" | "team" | "business";
+  readonly pricing: "free" | "free-pro" | "professional" | "team" | "business";
   readonly seo: {
     readonly title: string;
     readonly description: string;
   };
   readonly order: number;
 }
+
+export const toolPricingLabels = {
+  free: "Free",
+  "free-pro": "Free and Pro",
+  professional: "Professional",
+  team: "Team",
+  business: "Business",
+} satisfies Record<ToolDefinition["pricing"], string>;

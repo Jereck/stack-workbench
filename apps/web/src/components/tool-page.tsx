@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { toolCategories } from "@stack-workbench/shared";
+import { toolCategories, toolPricingLabels } from "@stack-workbench/shared";
 import type { ToolDefinition } from "@stack-workbench/shared";
 import { CategoryIcon } from "./category-icon";
 import { ToolStatus } from "./tool-status";
@@ -10,13 +10,6 @@ const processingLabels = {
   server: "On the server",
   hybrid: "Browser and server",
 } satisfies Record<ToolDefinition["processing"], string>;
-
-const pricingLabels = {
-  free: "Free",
-  professional: "Professional",
-  team: "Team",
-  business: "Business",
-} satisfies Record<ToolDefinition["pricing"], string>;
 
 export function ToolPage({
   tool,
@@ -61,7 +54,9 @@ export function ToolPage({
           <dt className="text-sm text-muted-foreground">
             {planned ? "Planned tier" : "Tier"}
           </dt>
-          <dd className="mt-1 font-semibold">{pricingLabels[tool.pricing]}</dd>
+          <dd className="mt-1 font-semibold">
+            {toolPricingLabels[tool.pricing]}
+          </dd>
         </div>
       </dl>
       <div className="mt-6">{children}</div>

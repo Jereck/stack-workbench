@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @source "../../../../packages/ui/src";
+@source "../../../../tools/integration-compare/src";
 @source "../../../../tools/log-inspector/src";
 
 @font-face {
@@ -93,7 +94,7 @@ body {
   color: var(--foreground);
 }
 
-:where(a, button, input, select, summary, [tabindex]):focus-visible {
+:where(a, button, input, select, summary, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }

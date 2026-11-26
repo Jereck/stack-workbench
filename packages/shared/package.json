@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./entitlements": "./src/entitlements.ts",
+    "./tool-handoff": "./src/tool-handoff.ts"
   }
 }

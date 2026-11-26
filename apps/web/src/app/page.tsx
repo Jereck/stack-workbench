@@ -1,7 +1,9 @@
-import { ArrowRight, FileText, LockKeyhole } from "lucide-react";
+import { ArrowRight, LockKeyhole } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@stack-workbench/ui/button";
+import { toolPricingLabels } from "@stack-workbench/shared";
 import { LogExample } from "@/components/log-example";
+import { CategoryIcon } from "@/components/category-icon";
 import { listTools } from "@/lib/tools";
 
 export default function HomePage() {
@@ -17,7 +19,7 @@ export default function HomePage() {
             Developer tools for the systems you depend on.
           </h1>
           <p className="mt-4 max-w-[45ch] text-base leading-relaxed text-secondary">
-            Search application logs, follow failed requests, and inspect
+            Search application logs, follow failed requests, and compare
             structured payloads in your browser.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-2.5">
@@ -50,14 +52,13 @@ export default function HomePage() {
                   href={"/tools/" + tool.slug}
                   className="group flex min-h-14 items-center gap-3 px-2 py-3 hover:bg-surface-muted"
                 >
-                  <FileText
-                    size={17}
-                    className="shrink-0 text-accent"
-                    aria-hidden
-                  />
+                  <CategoryIcon category={tool.category} />
                   <span className="min-w-0">
-                    <span className="block text-sm font-semibold">
+                    <span className="flex flex-wrap items-baseline gap-x-2 text-sm font-semibold">
                       {tool.name}
+                      <span className="text-label font-normal text-muted-foreground">
+                        {toolPricingLabels[tool.pricing]}
+                      </span>
                     </span>
                     <span className="mt-0.5 block text-ui text-muted-foreground">
                       {tool.description}
@@ -82,11 +83,11 @@ export default function HomePage() {
             className="flex items-center gap-2 text-lg font-semibold tracking-tight"
           >
             <LockKeyhole size={17} className="text-success" aria-hidden /> Your
-            logs stay on this device
+            data stays on this device
           </h2>
           <p className="mt-2 max-w-[42ch] text-sm leading-relaxed text-secondary">
-            Log Inspector reads and parses files in browser memory. Clear the
-            workspace to discard your input and results.
+            Log Inspector and Integration Compare process files in browser
+            memory. Clear the workspace to discard your input and results.
           </p>
           <Link
             href="/privacy"

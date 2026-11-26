@@ -9,6 +9,7 @@
   "dependencies": {
     "@stack-workbench/log-parser": "workspace:*",
     "@stack-workbench/redaction-engine": "workspace:*",
+    "@stack-workbench/shared": "workspace:*",
     "@stack-workbench/ui": "workspace:*",
     "monaco-editor": "0.58.0",
     "react": "19.3.1"

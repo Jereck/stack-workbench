@@ -12,6 +12,8 @@ Keep normalized event and filtering logic, payload extraction, and redaction in 
 
 Start a dedicated worker for each parse or export. The UI gets a structured result or local Blob and terminates the worker. Cancel and Clear terminate any active worker. In-memory results serve filtering and pagination directly, so an idle worker can release its duplicate data. Enforce limits on UTF-8 input size, records, payload scan work, nesting, and extracted output.
 
+Enforce the parser's byte cap before applying editor changes. Use the model's complete edit batch to account for all cursor selections and replacements. Check original full-paste and file bytes separately. The editor uses LF on all platforms, and parsing preserves the received text until it is edited. Undo and redo restore previously admitted model versions.
+
 Use a streaming XML parser with namespace awareness and reject document type declarations. Render generated views as text. Preserve raw event slices for inspection and apply configurable best-effort redaction to export copies.
 
 ## Consequences

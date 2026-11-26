@@ -12,4 +12,10 @@ export type {
   LogLevel,
   LogResult,
 } from "./model";
-export { InputLimitError, inputExceedsLimit, parseLogs } from "./parse";
+export {
+  detectLogLineFormat,
+  detectStructuredLogFormat,
+  InputLimitError,
+  inputExceedsLimit,
+  parseLogs,
+} from "./parse";

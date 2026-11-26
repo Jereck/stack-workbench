@@ -21,6 +21,7 @@ import {
   redactionOptions,
 } from "@stack-workbench/redaction-engine";
 import type { RedactionCategory } from "@stack-workbench/redaction-engine";
+import type { CompareTransfer } from "@stack-workbench/shared/tool-handoff";
 import { Button } from "@stack-workbench/ui/button";
 import {
   controlClass,
@@ -154,10 +155,12 @@ export function Explorer({
   result,
   busy,
   onExport,
+  onTransfer,
 }: {
   result: LogResult;
   busy: boolean;
   onExport: Export;
+  onTransfer?: (transfer: CompareTransfer) => void;
 }) {
   const [mode, setMode] = useState<(typeof modes)[number]>("Events");
   const [query, setQuery] = useState("");
@@ -585,6 +588,7 @@ export function Explorer({
                 key={mode + inspected.index}
                 event={inspected}
                 exceptionsFirst={mode === "Exceptions"}
+                onTransfer={onTransfer}
               />
             ) : (
               <EmptyState title="No event selected">

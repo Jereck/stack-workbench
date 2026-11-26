@@ -18,6 +18,23 @@ export const toolRegistry: readonly ToolDefinition[] = [
     },
     order: 10,
   },
+  {
+    id: "integration-compare",
+    name: "Integration Compare",
+    description:
+      "Compare JSON, XML, SOAP, and text locally. Pro adds HTTP, session matching, batches, profiles, and reports.",
+    slug: "integration-compare",
+    category: "compare",
+    availability: "available",
+    processing: "browser",
+    pricing: "free-pro",
+    seo: {
+      title: "Integration Compare",
+      description:
+        "Compare JSON, XML, SOAP, and text for free in your browser. Integration Compare Pro includes HTTP and log sessions, record matching, profiles, and reports.",
+    },
+    order: 20,
+  },
 ];
 
 export function findTool(slug: string): ToolDefinition | undefined {

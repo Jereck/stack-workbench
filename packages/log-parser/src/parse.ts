@@ -15,7 +15,6 @@ import {
 import type { LogEvent, LogFormat, LogResult } from "./model";
 import { isSerilogText, normalizeEvent } from "./normalize";
 
-type Format = LogResult["format"];
 const malformed = "Malformed or unsupported JSON was retained as raw text.";
 const eventLimit =
   "The event limit was reached. Remaining records are available in this raw event.";
@@ -77,7 +76,9 @@ function cloudArray(value: Record<string, unknown>) {
   }
 }
 
-function structuredFormat(value: unknown): Format {
+export function detectStructuredLogFormat(
+  value: unknown,
+): "cloudwatch" | "serilog-json" | "json" {
   if (isRecord(value) && cloudArray(value)) return "cloudwatch";
   const first: unknown = Array.isArray(value)
     ? value.find((entry: unknown) => entry !== null)
@@ -93,7 +94,9 @@ function* lines(input: string) {
   }
 }
 
-function detectLines(input: string): Format {
+export function detectLogLineFormat(
+  input: string,
+): "serilog-json" | "cloudwatch" | "ndjson" | "serilog-text" | "text" {
   let inspected = 0;
   let jsonCount = 0;
   let compactCount = 0;
@@ -250,8 +253,8 @@ export function parseLogs(
   const format =
     override === "auto"
       ? whole === undefined
-        ? detectLines(input)
-        : structuredFormat(whole)
+        ? detectLogLineFormat(input)
+        : detectStructuredLogFormat(whole)
       : override;
   let payloadRemaining = MAX_RESULT_PAYLOAD_LENGTH;
 

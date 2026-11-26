@@ -8,9 +8,15 @@ The web server sets a no-referrer policy, disables MIME sniffing, and sets a con
 
 ## Log Inspector data flow
 
-The browser loads the local editor and worker assets from the site origin. The editor and file reader keep input in memory. A dedicated browser worker produces normalized events from the input. A separate operation generates an export from selected or filtered results and returns a local Blob. Untrusted strings render as text and XML parsing rejects document type declarations. Clearing the workspace resets the editor and its undo history, releases derived state, and stops the current operation. Explicit copy and download actions create user-controlled copies. [Log Inspector product guide](../products/log-inspector.md)
+The browser loads the local editor and worker assets from the site origin. The editor and file reader keep input in memory. The workspace checks the UTF-8 byte cap before accepting files and applying editor changes, and the parser verifies the cap before processing. A dedicated browser worker produces normalized events from the input. A separate operation generates an export from selected or filtered results and returns a local Blob. Untrusted strings render as text and XML parsing rejects document type declarations. Clearing the workspace resets the editor and its undo history, releases derived state, and stops the current operation. Explicit copy and download actions create user-controlled copies. [Log Inspector product guide](../products/log-inspector.md)
 
 The production browser test exercises pasted logs containing a synthetic marker, a log-controlled URL, and an XML document type declaration. It checks request URLs, headers and bodies, WebSocket traffic, and local and session storage.
+
+## Integration Compare data flow
+
+The workspace reads local files in browser memory and passes each pair into a dedicated worker through structured browser messages. Completion or cancellation terminates the worker. Clear releases input, results, and editor undo history across comparison modes. XML document parsing rejects DTDs. The workspace renders HTTP addresses and markup as text. Local storage holds the selected result view and explicitly saved, validated settings profiles. Profile fields can contain sensitive user-entered strings, so the workspace explains their scope before saving. Reports are built in a worker and downloaded locally. Printable reports block network resources. Browser tests exercise same-origin requests and check synthetic markers against traffic, console output, and storage. [Integration Compare product guide](../products/integration-compare.md)
+
+Explicit handoff commands stage a copy in app-owned memory for the current browser document. The destination consumes the inbox once and releases the intermediate copy. Refresh and the source clear actions discard pending data. Browser tests check that transfers leave URLs, history state, request data, console output, and persistent storage free of synthetic input. [ADR 0006](../decisions/0006-tool-handoff-and-entitlements.md)
 
 ## Requirements for tools
 

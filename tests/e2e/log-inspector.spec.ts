@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { pasteText } from "../fixtures/editor-paste";
 import {
   browserLogs,
   deliberateHtml,
@@ -22,6 +23,107 @@ async function parse(page: Page, count: number) {
     page.getByText(new RegExp("^Parsed " + count + " event")),
   ).toBeVisible();
 }
+
+function editorModifier(page: Page) {
+  // Monaco follows the browser's emulated platform, which can differ from the host.
+  return page.evaluate(() =>
+    navigator.userAgent.includes("Macintosh") ? "Meta" : "Control",
+  );
+}
+
+test(
+  "rejects oversized multicursor pastes and edits before changing the editor",
+  { tag: "@release" },
+  async ({ page }) => {
+    await openInspector(page);
+    const prefix = "alpha\nbeta\n";
+    await page.getByLabel("Choose log file").setInputFiles({
+      name: "near-limit.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.concat([
+        Buffer.from(prefix),
+        Buffer.alloc(4 * 1024 * 1024 - 2 - prefix.length, "x"),
+      ]),
+    });
+    await expect(
+      page.getByText("Local file loaded. Parse logs to inspect it."),
+    ).toBeVisible();
+
+    const editor = page.getByRole("textbox", { name: /Raw log text/ });
+    const lines = page.locator(".monaco-editor .view-line");
+    const limit = page.getByText("Logs must be 4 MiB or smaller.", {
+      exact: true,
+    });
+    const position = { x: 2, y: 8 };
+    await lines.nth(0).click({ position });
+    await lines.nth(1).click({ position, modifiers: ["Alt"] });
+    await expect(
+      page.locator(".monaco-editor .cursors-layer .cursor"),
+    ).toHaveCount(2);
+    await pasteText(editor, "é");
+    await expect(limit).toBeVisible();
+    await expect(lines.nth(0)).toHaveText("alpha");
+    await expect(lines.nth(1)).toHaveText("beta");
+
+    await pasteText(editor, "Z");
+    await expect(lines.nth(0)).toHaveText("Zalpha");
+    await expect(lines.nth(1)).toHaveText("Zbeta");
+    await editor.press("End");
+    await editor.press("n");
+    await expect(lines.nth(0)).toHaveText("Zalpha");
+    await expect(lines.nth(1)).toHaveText("Zbeta");
+    const modifier = await editorModifier(page);
+    await editor.press(modifier + "+z");
+    await expect(lines.nth(0)).toHaveText("alpha");
+    await expect(lines.nth(1)).toHaveText("beta");
+    await editor.press(modifier === "Meta" ? "Meta+Shift+Z" : "Control+y");
+    await expect(lines.nth(0)).toHaveText("Zalpha");
+    await expect(lines.nth(1)).toHaveText("Zbeta");
+  },
+);
+
+test(
+  "enforces the UTF-8 limit on original clipboard text and preserves the current results",
+  { tag: "@release" },
+  async ({ page }) => {
+    await openInspector(page);
+    const editor = page.getByRole("textbox", { name: /Raw log text/ });
+    const selectAll = (await editorModifier(page)) + "+a";
+    await editor.focus();
+    const prefix = "At the UTF-8 byte limit\n";
+    await pasteText(
+      editor,
+      prefix + "x".repeat(4 * 1024 * 1024 - prefix.length),
+    );
+    await expect(page.locator(".monaco-editor .view-line").first()).toHaveText(
+      prefix.trim(),
+    );
+    await editor.press(selectAll);
+    await pasteText(editor, '{"message":"Original capture"}\r\n');
+    await parse(page, 1);
+    const events = page.getByRole("list", { name: "Log events", exact: true });
+    await expect(
+      events.getByRole("button", { name: /Original capture/ }),
+    ).toBeVisible();
+    await editor.press(selectAll);
+    await pasteText(editor, "é".repeat(2 * 1024 * 1024) + "x");
+    await expect(
+      page
+        .getByRole("status")
+        .filter({ hasText: "Logs must be 4 MiB or smaller." }),
+    ).toBeVisible();
+    await expect(
+      events.getByRole("button", { name: /Original capture/ }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/Showing results from the last parse/),
+    ).toHaveCount(0);
+    await parse(page, 1);
+    await expect(
+      events.getByRole("button", { name: /Original capture/ }),
+    ).toBeVisible();
+  },
+);
 
 test("pastes logs, explores results and downloads redacted copies locally", async ({
   page,

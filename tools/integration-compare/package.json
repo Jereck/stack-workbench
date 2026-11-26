@@ -1,0 +1,20 @@
+{
+  "name": "@stack-workbench/integration-compare",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./worker": "./src/worker-client.ts"
+  },
+  "dependencies": {
+    "@stack-workbench/comparison-engine": "workspace:*",
+    "@stack-workbench/redaction-engine": "workspace:*",
+    "@stack-workbench/shared": "workspace:*",
+    "@stack-workbench/ui": "workspace:*",
+    "lucide-react": "1.79.0",
+    "react": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.1"
+  }
+}
